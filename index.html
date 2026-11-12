@@ -1,0 +1,904 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Parça Patlat">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#10264a">
+<meta name="build" content="20261113-014140">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" type="image/png" href="icon.png">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{box-sizing:border-box}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Parça Patlat</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito+Sans:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: one-screen game. Header (credits | logo | settings), stat strip, belt, 3x2 trays, action bar.
+   Default palette "Iznik": tile blue, tulip red, glaze white. Other skins are chosen in settings. */
+:root{
+  --bg:#e8f0f4; --pat:#d3e0e9; --surface:#ffffff; --ink:#10264a; --ink2:#4b6283;
+  --tray:#ffffff; --tray-edge:#b9cddc; --glow:#1f9a94; --accent:#d6402f; --accent-ink:#ffffff;
+  --belt:#c9d9e5; --belt-stripe:#b4c8d8; --coin:#c98a12;
+  --k0:#2f9e6a; --k1:#d9922b; --k2:#d6402f; --k3:#8a5cc7;
+  --shadow:0 2px 0 rgba(16,38,74,.12);
+  --font-display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --font-body:"Nunito Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --emoji:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1a30;--pat:#12243f;--surface:#142846;--ink:#eaf1fa;--ink2:#9bb0cb;
+    --tray:#1b3459;--tray-edge:#2f5183;--glow:#3cc8c0;--accent:#ff6b57;--accent-ink:#1a0a07;
+    --belt:#173055;--belt-stripe:#1f3d6b;--coin:#f2c14e;--k0:#4cc58c;--k1:#f0b040;--k2:#ff6b57;--k3:#b48cf0;
+    --shadow:0 2px 0 rgba(0,0,0,.35);color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1a30;--pat:#12243f;--surface:#142846;--ink:#eaf1fa;--ink2:#9bb0cb;
+  --tray:#1b3459;--tray-edge:#2f5183;--glow:#3cc8c0;--accent:#ff6b57;--accent-ink:#1a0a07;
+  --belt:#173055;--belt-stripe:#1f3d6b;--coin:#f2c14e;--k0:#4cc58c;--k1:#f0b040;--k2:#ff6b57;--k3:#b48cf0;
+  --shadow:0 2px 0 rgba(0,0,0,.35);color-scheme:dark;
+}
+/* Skins picked by the player override the default palette */
+body[data-skin="gece"]{--bg:#0f1426;--pat:#161d36;--surface:#1a2240;--ink:#f3eedd;--ink2:#a9b0c8;--tray:#222c52;--tray-edge:#3a4778;--glow:#e8b84a;--accent:#e8b84a;--accent-ink:#1a1405;--belt:#1a2346;--belt-stripe:#24305c;--coin:#e8b84a;--k0:#6fd3a0;--k1:#f2c14e;--k2:#ff7a6b;--k3:#b79cff;--shadow:0 2px 0 rgba(0,0,0,.4);color-scheme:dark}
+body[data-skin="lokum"]{--bg:#fbe9ef;--pat:#f3d3df;--surface:#ffffff;--ink:#4a1630;--ink2:#8a5470;--tray:#ffffff;--tray-edge:#efbfd0;--glow:#d94f8a;--accent:#c2185b;--accent-ink:#ffffff;--belt:#f4cfdc;--belt-stripe:#ecbdcd;--coin:#b7790f;--k0:#3a9d6a;--k1:#d48a1f;--k2:#d23a5a;--k3:#7d4fc4;--shadow:0 2px 0 rgba(74,22,48,.12);color-scheme:light}
+body[data-skin="zeytin"]{--bg:#e9eedd;--pat:#d9e1c6;--surface:#fbfcf6;--ink:#26301a;--ink2:#5c6a48;--tray:#fbfcf6;--tray-edge:#bccaa0;--glow:#6b8e23;--accent:#5a7a1e;--accent-ink:#ffffff;--belt:#d3dcbd;--belt-stripe:#c3cfa6;--coin:#a87512;--k0:#3f8f4f;--k1:#c98a1b;--k2:#c4472f;--k3:#7a5aa8;--shadow:0 2px 0 rgba(38,48,26,.12);color-scheme:light}
+body[data-skin="neon"]{--bg:#0b0618;--pat:#170d2e;--surface:#160c2c;--ink:#f4ecff;--ink2:#b39fd6;--tray:#1d1038;--tray-edge:#3d2370;--glow:#22e6d6;--accent:#ff3fb4;--accent-ink:#1a0012;--belt:#1a0f33;--belt-stripe:#2a1650;--coin:#ffd23f;--k0:#39f59a;--k1:#ffd23f;--k2:#ff4f7b;--k3:#a77bff;--shadow:0 2px 0 rgba(0,0,0,.5);color-scheme:dark}
+body[data-skin="lav"]{--bg:#17110e;--pat:#211814;--surface:#221915;--ink:#fbeee4;--ink2:#bfa898;--tray:#2a1f1a;--tray-edge:#4a362c;--glow:#ff8a3d;--accent:#ff6a1f;--accent-ink:#1a0800;--belt:#251b16;--belt-stripe:#33251e;--coin:#ffc14d;--k0:#7bd389;--k1:#ffc14d;--k2:#ff5a4a;--k3:#c59bff;--shadow:0 2px 0 rgba(0,0,0,.5);color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;
+  background-image:radial-gradient(circle at 50% 50%,var(--pat) 0 2px,transparent 3px);background-size:26px 26px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none;-webkit-user-select:none;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{height:100%;max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:10px;min-height:0}
+
+/* header */
+.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.credit{justify-self:start;display:flex;align-items:center;gap:7px;background:var(--surface);border:2px solid var(--tray-edge);border-radius:14px;padding:5px 10px 5px 7px;box-shadow:var(--shadow)}
+.credit .coin{font-size:1.35rem;line-height:1;display:flex}
+/* original art: UI icons and item tokens are drawn in code and take the theme colours */
+.ic{width:1.15em;height:1.15em;display:inline-block;vertical-align:-.22em;flex:none}
+.lb{display:inline-flex;align-items:center;gap:6px}
+.it{width:1em;height:1em;display:block;overflow:visible;flex:none}
+.it .f{fill:var(--kc)}
+.it .l{fill:color-mix(in srgb,var(--kc) 28%,var(--tray))}
+.it .o{stroke:var(--kc);stroke-width:4;stroke-linejoin:round}
+.it .s{fill:none;stroke:var(--kc);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+.it .s2{fill:none;stroke:var(--kc);stroke-width:3;stroke-linecap:round}
+.it .w{stroke-width:5}
+.it .c{fill:var(--tray);stroke:var(--kc);stroke-width:3.5}
+.it .n{fill:var(--ink);font:700 21px var(--font-display);text-anchor:middle}
+.cur .it{font-size:1.2em}
+.ring{width:.95em;height:.95em;border-radius:50%;border:2px dashed var(--glow);display:block}
+.ck{display:flex;font-size:1.05rem}
+.st b .ic{font-size:.8em}
+.credit .cv{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05}
+.credit small{font-size:.62rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2)}
+.credit b{font-family:var(--font-display);font-size:1.12rem;color:var(--coin);font-variant-numeric:tabular-nums}
+.credit.bump{animation:bump .5s ease-out}
+@keyframes bump{40%{transform:scale(1.12)}}
+.logo{margin:0;font-family:var(--font-display);font-weight:700;line-height:.86;text-align:center;display:flex;flex-direction:column;align-items:center;font-size:1.42rem;letter-spacing:.02em}
+.logo .b{color:var(--accent);transform:rotate(-4deg) translateX(9px);display:block}
+.gear{justify-self:end;width:46px;height:46px;border-radius:14px;background:var(--surface);border:2px solid var(--tray-edge);display:grid;place-items:center;box-shadow:var(--shadow);padding:0}
+.gear svg{width:22px;height:22px}
+
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.st{display:flex;flex-direction:column;line-height:1.1}
+.st small{font-size:.64rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);font-weight:800}
+.st b{font-family:var(--font-display);font-size:1.3rem;font-variant-numeric:tabular-nums}
+.st.gain b{color:var(--coin)}
+.heat{display:flex;align-items:center;gap:5px;font-size:.66rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2)}
+.heat i{width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);display:block}
+.heat i.on{background:var(--accent)}
+.app.fire .belt{box-shadow:0 0 0 3px var(--accent),var(--shadow)}
+.app.fire .belt::before{animation-duration:.5s}
+.app.fire .hint{color:var(--accent);font-weight:800}
+.mis{display:flex;flex-direction:column;gap:6px;background:var(--bg);border-radius:14px;padding:10px 12px}
+.mis .mh{font-size:.66rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);display:flex;justify-content:space-between;gap:8px}
+.mis .mr{display:flex;align-items:center;gap:8px;font-size:.9rem;line-height:1.25}
+.mis .mr .tx{flex:1;min-width:0}
+.mis .mr.done .tx{text-decoration:line-through;color:var(--ink2)}
+.mis .mr b{font-family:var(--font-display);color:var(--coin);white-space:nowrap;font-variant-numeric:tabular-nums}
+.mis .pg{color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:.8rem}
+
+/* belt */
+.belt{position:relative;background:var(--belt);border-radius:18px;padding:11px 14px;display:flex;align-items:center;gap:12px;overflow:hidden;box-shadow:var(--shadow)}
+.belt::before{content:"";position:absolute;inset:0;opacity:.7;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 22px,var(--belt-stripe) 22px 26px);animation:run 1.4s linear infinite}
+@keyframes run{to{background-position:26px 0}}
+.cur{position:relative;flex:none;width:86px;height:86px;border-radius:50%;background:var(--tray);border:3px solid var(--tray-edge);display:grid;place-items:center;font-size:2.9rem;font-family:var(--emoji);line-height:1;box-shadow:var(--shadow)}
+.cur .lvl{position:absolute;right:-6px;bottom:-4px;background:var(--ink);color:var(--bg);font-family:var(--font-display);font-size:.74rem;font-weight:700;border-radius:999px;padding:2px 7px;line-height:1.2}
+.cur.frag .lvl{background:var(--accent);color:var(--accent-ink)}
+.cur.pop{animation:pop .22s ease-out}
+.queue{position:relative;display:flex;flex-direction:column;gap:6px;min-width:0}
+.queue .lab{font-size:.66rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2)}
+.nexts{display:flex;gap:8px}
+.nx{position:relative;width:40px;height:40px;border-radius:50%;background:var(--tray);border:2px solid var(--tray-edge);display:grid;place-items:center;font-size:1.3rem;font-family:var(--emoji);line-height:1}
+.nx[data-f]::after{content:attr(data-f);position:absolute;right:-6px;bottom:-5px;background:var(--accent);color:var(--accent-ink);font:700 .6rem/1.3 var(--font-display);border-radius:999px;padding:0 4px}
+
+/* kind colours */
+[data-k="0"]{--kc:var(--k0)}[data-k="1"]{--kc:var(--k1)}[data-k="2"]{--kc:var(--k2)}[data-k="3"]{--kc:var(--k3)}
+.cur[data-k],.nx[data-k],.tray[data-k]{border-color:var(--kc)}
+
+/* pie for split items */
+.pie{position:absolute;inset:7%;border-radius:50%;pointer-events:none;
+  background:
+    repeating-conic-gradient(from 0deg,var(--tray-edge) 0 2.5deg,transparent 2.5deg calc(360deg / var(--d))),
+    conic-gradient(from 0deg,color-mix(in srgb,var(--kc) 40%,transparent) calc(var(--p) * 1%),transparent 0)}
+.cur .pie{inset:4px}
+
+/* trays */
+.trays{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;flex:1;min-height:0;align-content:center}
+.tray{position:relative;aspect-ratio:1;width:100%;border-radius:50%;background:var(--tray);border:4px solid var(--tray-edge);display:grid;place-items:center;padding:0;box-shadow:var(--shadow);transition:transform .12s,box-shadow .15s,border-color .15s}
+.tray .in{position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px;width:94%;line-height:1.1;font-size:clamp(1.3rem,7.6vw,2.05rem)}
+.tray .dot{width:9px;height:9px;border-radius:50%;background:var(--tray-edge);opacity:.8;margin:6px}
+.tray .fe{position:relative;font-family:var(--emoji);font-size:clamp(1.8rem,10vw,2.7rem);line-height:1}
+.tray .fc{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);font:700 .72rem/1.3 var(--font-display);border-radius:999px;padding:0 7px;font-variant-numeric:tabular-nums}
+.tray.ok{box-shadow:0 0 0 4px color-mix(in srgb,var(--glow) 45%,transparent),var(--shadow);transform:scale(1.03)}
+.tray.ok::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px dashed var(--glow);animation:spin 6s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tray:active{transform:scale(.96)}
+.tray.pop .in,.tray.pop .fe{animation:pop .22s ease-out}
+.tray.shake{animation:shake .28s}
+.tray.merging{animation:merge .3s ease-in}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes merge{0%{transform:scale(1)}60%{transform:scale(1.14)}100%{transform:scale(.85);opacity:.4}}
+.fl{position:fixed;pointer-events:none;font-family:var(--font-display);font-weight:700;font-size:1.25rem;color:var(--accent);animation:up .95s ease-out forwards;z-index:5;text-shadow:0 1px 0 var(--bg);white-space:nowrap;transform:translateX(-50%)}
+@keyframes up{from{opacity:1;margin-top:0}to{opacity:0;margin-top:-46px}}
+
+.hint{text-align:center;font-size:.86rem;color:var(--ink2);min-height:1.25em;margin:0;line-height:1.3}
+.hint.warn{color:var(--accent);font-weight:700}
+
+/* action bar */
+.bar{display:flex;gap:10px}
+.btn{border-radius:14px;padding:11px 14px;font-family:var(--font-display);font-weight:600;font-size:1rem;background:var(--surface);color:var(--ink);box-shadow:var(--shadow);border:2px solid var(--tray-edge)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn:focus-visible,.tray:focus-visible,.gear:focus-visible,.credit:focus-visible,.opt:focus-visible{outline:3px solid var(--glow);outline-offset:3px}
+.act{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.act[disabled]{opacity:.45;cursor:not-allowed}
+.act.need{border-color:var(--accent);animation:needp .8s ease-in-out infinite}
+@keyframes needp{50%{transform:scale(1.04)}}
+.cnt{background:var(--ink);color:var(--bg);border-radius:999px;font-size:.8rem;padding:1px 8px;font-variant-numeric:tabular-nums}
+.cnt.price{background:transparent;color:var(--coin);border:1.5px solid var(--coin);padding:0 6px}
+.endb{flex:none}
+
+/* overlays */
+.ov{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 84%,transparent);backdrop-filter:blur(3px);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px))}
+.ov[hidden]{display:none!important}
+.card{width:100%;max-width:400px;background:var(--surface);border:2px solid var(--tray-edge);border-radius:22px;padding:20px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:13px;max-height:100%;overflow:auto;-webkit-user-select:text;user-select:text}
+.card h1,.card h2{font-family:var(--font-display);margin:0;font-size:1.75rem;line-height:1.05;text-wrap:balance}
+.card h3{font-family:var(--font-display);margin:6px 0 0;font-size:1.05rem;font-weight:600}
+.card p{margin:0;color:var(--ink2);line-height:1.45}
+.rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.rules li{display:flex;gap:12px;align-items:center;line-height:1.35}
+.rules .em{flex:none;min-width:84px;display:flex;align-items:center;justify-content:center;gap:4px;font-weight:800;font-size:1.25rem;background:var(--bg);border-radius:12px;padding:7px 6px;white-space:nowrap}
+.rules .em span{font-size:.85rem}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{border:2px solid var(--tray-edge);background:var(--bg);border-radius:12px;padding:9px;font-weight:800;color:var(--ink2)}
+.seg button[aria-pressed="true"]{border-color:var(--glow);color:var(--ink);background:color-mix(in srgb,var(--glow) 18%,var(--bg))}
+.big{font-family:var(--font-display);font-size:3rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.res{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.res .top-item{font-size:2.7rem;font-family:var(--emoji);line-height:1}
+.res small{display:block;color:var(--ink2);font-size:.8rem}
+.earn{display:flex;align-items:center;gap:10px;background:color-mix(in srgb,var(--coin) 14%,var(--surface));border:2px solid color-mix(in srgb,var(--coin) 45%,transparent);border-radius:14px;padding:10px 12px;font-weight:700}
+.earn b{font-family:var(--font-display);font-size:1.3rem;color:var(--coin);font-variant-numeric:tabular-nums}
+.share{width:100%;min-height:76px;resize:none;border-radius:12px;border:2px solid var(--tray-edge);background:var(--bg);color:var(--ink);font:inherit;padding:8px 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row .btn{flex:1 1 140px}
+
+/* settings */
+.cardhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.x{width:40px;height:40px;border-radius:12px;border:2px solid var(--tray-edge);background:var(--bg);font-size:1.1rem;padding:0}
+.wallet{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg);border-radius:14px;padding:10px 12px}
+.wallet .coin{font-size:1.5rem;display:flex}
+.wallet b{font-family:var(--font-display);font-size:1.4rem;color:var(--coin);font-variant-numeric:tabular-nums}
+.wallet small{flex-basis:100%;color:var(--ink2);line-height:1.35}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--bg);border-radius:12px;padding:4px}
+.tabs button{border:0;background:transparent;border-radius:9px;padding:9px 2px;font-weight:800;font-size:.82rem;color:var(--ink2)}
+.tabs button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.tabs button:focus-visible{outline:3px solid var(--glow);outline-offset:1px}
+.pane{display:flex;flex-direction:column;gap:10px}
+.pane[hidden]{display:none}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.opt{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;border:2px solid var(--tray-edge);background:var(--bg);border-radius:14px;padding:10px;min-width:0}
+.opt[aria-pressed="true"]{border-color:var(--glow);background:color-mix(in srgb,var(--glow) 14%,var(--bg))}
+.opt .on{font-weight:800}
+.opt .stt{font-size:.78rem;color:var(--ink2);font-weight:700}
+.opt .stt.buy{color:var(--coin)}
+.opt .stt.conf{color:var(--accent)}
+.sw{display:flex;gap:4px}
+.sw i{width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(128,128,128,.35)}
+.packs{display:flex;flex-direction:column;gap:8px}
+.packs .opt{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+.packs .chain{display:flex;gap:3px;font-size:1.5rem;flex:none}
+.packs .meta{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tg{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0;font-weight:700}
+.tg input{appearance:none;-webkit-appearance:none;width:48px;height:28px;border-radius:999px;background:var(--tray-edge);position:relative;cursor:pointer;flex:none;margin:0}
+.tg input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--surface);transition:transform .15s}
+.tg input:checked{background:var(--glow)}
+.tg input:checked::after{transform:translateX(20px)}
+.tg input:focus-visible{outline:3px solid var(--glow);outline-offset:2px}
+.tg small{display:block;font-weight:600;color:var(--ink2);font-size:.78rem}
+.sl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0}
+.sl div{background:var(--bg);border-radius:12px;padding:8px;text-align:center}
+.sl dt{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:800}
+.sl dd{margin:0;font-family:var(--font-display);font-size:1.2rem;font-variant-numeric:tabular-nums}
+.fine{font-size:.8rem}
+@media (max-height:660px){.cur{width:66px;height:66px;font-size:2.2rem}.nx{width:34px;height:34px;font-size:1.05rem}.card{padding:14px}.logo{font-size:1.2rem}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<main class="app" id="app">
+  <header class="top">
+    <button class="credit" id="crBtn" type="button" aria-label="Kredi ve mağaza">
+      <span class="coin"><svg class="ic" aria-hidden="true"><use href="#i-coin"/></svg></span>
+      <span class="cv"><small>Kredi</small><b id="cr">0</b></span>
+    </button>
+    <h1 class="logo"><span>PARÇA</span><span class="b">PATLAT</span></h1>
+    <button class="gear" id="gear" type="button" aria-label="Menü">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </header>
+
+  <div class="strip">
+    <div class="st"><small>Skor</small><b id="score">0</b></div>
+    <div class="st"><small>Rekor</small><b id="best">0</b></div>
+    <div class="st"><small>Seri</small><b id="seri">0</b></div>
+    <div class="st gain"><small>Kazanç</small><b id="pend">+0</b></div>
+  </div>
+
+  <section class="belt" aria-label="Bant">
+    <div class="cur" id="cur" aria-live="polite"><span class="pie" id="curPie" hidden></span><span id="curE" style="position:relative;display:flex"></span><span class="lvl" id="curL">1</span></div>
+    <div class="queue">
+      <span class="lab">Sıradakiler</span>
+      <div class="nexts" id="nexts"></div>
+      <div class="heat" id="heat" aria-label="Ateş göstergesi"><span>Ateş</span><i></i><i></i><i></i></div>
+    </div>
+  </section>
+
+  <p class="hint" id="hint">Eşyayı parlayan tepsilerden birine koy.</p>
+
+  <section class="trays" id="trays" aria-label="Tepsiler"></section>
+
+  <div class="bar">
+    <button class="btn act" id="bin" type="button"><span class="lb"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg>Çöp</span><span class="cnt" id="binN">1</span></button>
+    <button class="btn act" id="undo" type="button"><span class="lb"><svg class="ic" aria-hidden="true"><use href="#i-undo"/></svg>Geri al</span><span class="cnt" id="undoN">1</span></button>
+    <button class="btn primary endb" id="endBtn" type="button" hidden>Bitir</button>
+  </div>
+</main>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.5" fill="var(--coin)"/><circle cx="12" cy="12" r="7" fill="none" stroke="var(--surface)" stroke-width="1.5"/><path d="M12 8.2l3.8 3.8-3.8 3.8L8.2 12z" fill="var(--surface)"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M8 5L3.5 9.5 8 14M4 9.5h10a6 6 0 0 1 0 12h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-2.5 1.2-4 2.5-5.5C9 10.5 10 12 10.5 12 11 9 10.5 5 12 2z" fill="var(--accent)"/><path d="M12 13c.6 1.6 2.4 2.4 2.4 4.6a2.4 2.4 0 0 1-4.8 0c0-1.8 1.4-2.6 2.4-4.6z" fill="var(--surface)"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="currentColor" stroke-width="2.2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" fill="var(--glow)"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+</defs></svg>
+
+<div class="ov" id="start" role="dialog" aria-modal="true" aria-labelledby="startT">
+  <div class="card">
+    <h1 id="startT">Parça Patlat</h1>
+    <p>Bantta gelen eşyaları tepsilere diz, birleştir, parçaları bütün yap.</p>
+    <ul class="rules">
+      <li><span class="em" id="ru1"></span><span>Eşyayı boş ya da aynı eşyanın olduğu tepsiye koy.</span></li>
+      <li><span class="em" id="ru2"></span><span>Aynı üç eşya birleşir: bir üst seviye olur ve bandın başına döner.</span></li>
+      <li><span class="em" id="ru3"></span><span>Bazı eşyalar 3 ya da 5 parçaya bölünmüş gelir. Parçaları aynı tepsiye topla, bütün olsun.</span></li>
+      <li><span class="em"><svg class="ic" aria-hidden="true"><use href="#i-fire"/></svg><span>x2</span></span><span>Kısa sürede 3 birleştirme yap, ateş modu açılsın: 8 hamle boyunca puanlar iki kat.</span></li>
+      <li><span class="em"><svg class="ic" aria-hidden="true"><use href="#i-coin"/></svg><span>%25</span></span><span>Oyun bitince skorunun dörtte biri krediye döner. Günlük görevler ve seri ek kredi verir.</span></li>
+    </ul>
+    <div class="mis" id="misStart"></div>
+    <div class="seg" role="group" aria-label="Oyun türü">
+      <button type="button" id="mDaily" aria-pressed="true">Günlük bulmaca</button>
+      <button type="button" id="mFree" aria-pressed="false">Serbest</button>
+    </div>
+    <p id="modeNote" style="font-size:.85rem">Bugün herkes aynı eşya sırasını alır. Skorunu arkadaşlarınla kıyasla.</p>
+    <button class="btn primary" id="go" type="button">Başla</button>
+  </div>
+</div>
+
+<div class="ov" id="end" hidden role="dialog" aria-modal="true" aria-labelledby="endT">
+  <div class="card">
+    <h2 id="endT">Tepsiler doldu</h2>
+    <div class="res">
+      <div><div class="big" id="endS">0</div><small>puan</small></div>
+      <div><div class="top-item" id="endI"></div><small id="endM">0 birleşme</small></div>
+    </div>
+    <div class="earn"><span style="font-size:1.4rem;display:flex"><svg class="ic" aria-hidden="true"><use href="#i-coin"/></svg></span><span>Kazandığın kredi</span><b id="endC" style="margin-left:auto">+0</b></div>
+    <p id="endB"></p>
+    <div class="mis" id="misEnd"></div>
+    <textarea class="share" id="shareTxt" readonly aria-label="Paylaşım metni"></textarea>
+    <div class="row">
+      <button class="btn primary" id="copy" type="button">Skoru kopyala</button>
+      <button class="btn" id="again" type="button">Tekrar oyna</button>
+    </div>
+    <button class="btn" id="shop" type="button">Kredini harca: tema ve paketler</button>
+  </div>
+</div>
+
+<div class="ov" id="set" hidden role="dialog" aria-modal="true" aria-labelledby="setT">
+  <div class="card">
+    <div class="cardhead"><h2 id="setT">Menü</h2><button class="x" id="setX" type="button" aria-label="Kapat">✕</button></div>
+    <div class="wallet"><span class="coin"><svg class="ic" aria-hidden="true"><use href="#i-coin"/></svg></span><b id="cr2">0</b><span>kredi</span></div>
+    <div class="tabs" id="tabs" role="group" aria-label="Menü bölümleri"><button type="button" data-tab="gorev" aria-pressed="true">Görevler</button><button type="button" data-tab="tema" aria-pressed="false">Temalar</button><button type="button" data-tab="paket" aria-pressed="false">Paketler</button><button type="button" data-tab="ayar" aria-pressed="false">Ayarlar</button></div>
+    <div class="pane" data-pane="gorev"><div class="mis" id="misSet"></div><p class="fine">Oyun bitince skorunun dörtte biri krediye döner.</p></div>
+    <div class="pane" data-pane="tema" hidden>
+    <div class="grid2" id="skins"></div>
+    <p class="fine">Kilitli olana dokun, sonra onayla.</p></div>
+    <div class="pane" data-pane="paket" hidden>
+    <div class="packs" id="packs"></div>
+    <p class="fine">Kilitli olana dokun, sonra onayla.</p></div>
+    <div class="pane" data-pane="ayar" hidden>
+    <label class="tg" for="optSound"><span>Ses</span><input type="checkbox" id="optSound"></label>
+    <label class="tg" for="optVib"><span>Titreşim<small>iPhone Safari titreşimi desteklemiyor</small></span><input type="checkbox" id="optVib"></label>
+    <dl class="sl">
+      <div><dt>Oyun</dt><dd id="sG">0</dd></div>
+      <div><dt>Birleşme</dt><dd id="sM">0</dd></div>
+      <div><dt>Bütün</dt><dd id="sW">0</dd></div>
+    </dl>
+    <button class="btn" id="quit" type="button">Bu oyunu bitir, kredimi al</button>
+    <p class="fine">Oyunun ve kredin her hamlede bu cihaza kaydedilir. Kredi oyun içi puandır, gerçek para değildir.</p></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var CAP = 3, PLATES = 6, MAXT = 5, KEY = 'parca-patlat-v1';
+  var PACKS = [
+    {id:'cay', name:'Çini', price:0, art:['rosette', 'star', 'gem', 'drops']},
+    {id:'bahce', name:'Bahçe', price:400, art:['sprig', 'bloom', 'hive', 'burst']},
+    {id:'deniz', name:'Deniz', price:650, art:['waves', 'rings', 'shell', 'drops']},
+    {id:'uzay', name:'Uzay', price:950, art:['moon', 'orbit', 'star', 'burst']},
+    {id:'hayvan', name:'Kristal', price:1300, art:['gem', 'hive', 'rosette', 'rings']}
+  ];
+  var SKINS = [
+    {id:'iznik',  name:'İznik',  price:0,   sw:['#e8f0f4','#10264a','#d6402f','#1f9a94'], note:'Cihaz temasına uyar'},
+    {id:'gece',   name:'Gece',   price:0,   sw:['#0f1426','#f3eedd','#e8b84a','#6fd3a0']},
+    {id:'lokum',  name:'Lokum',  price:350, sw:['#fbe9ef','#4a1630','#c2185b','#3a9d6a']},
+    {id:'zeytin', name:'Zeytin', price:350, sw:['#e9eedd','#26301a','#5a7a1e','#c98a1b']},
+    {id:'neon',   name:'Neon',   price:800, sw:['#0b0618','#f4ecff','#ff3fb4','#22e6d6']},
+    {id:'lav',    name:'Lav',    price:800, sw:['#17110e','#fbeee4','#ff6a1f','#7bd389']}
+  ];
+  var BOOST = {bin:{base:120,label:'Çöp'}, undo:{base:180,label:'Geri al'}};
+  var RATE = 0.25, FIRE_LEN = 8, STREAK_REWARD = {3:50, 7:150, 14:300, 30:750};
+  var POOL = {
+    merge:{t:[12,18], r:40, txt:function(n){ return n+' birleştirme yap'; }},
+    whole:{t:[2,3],   r:50, txt:function(n){ return n+' parçalı eşyayı bütün yap'; }},
+    score:{t:[500,800], r:50, txt:function(n){ return 'Tek oyunda '+n+' puan yap'; }},
+    fire: {t:[2,3],   r:50, txt:function(n){ return 'Ateş modunu '+n+' kez aç'; }},
+    tier: {t:[4],     r:60, txt:function(n){ return 'Seviye '+n+' bir eşya yap'; }},
+    games:{t:[3],     r:30, txt:function(n){ return n+' oyun bitir'; }}
+  };
+  var $ = function(id){ return document.getElementById(id); };
+  var fmt = function(n){ return Number(n).toLocaleString('tr-TR'); };
+
+  /* ---------- saved progress ---------- */
+  function defaults(){ return {credits:0,best:0,owned:{skin:['iznik','gece'],pack:['cay']},skin:'iznik',pack:'cay',sound:true,vib:true,stats:{games:0,merges:0,wholes:0},streak:{count:0,last:''},missions:null}; }
+  function load(){
+    var d = defaults();
+    try{
+      var raw = localStorage.getItem(KEY);
+      if (raw){ var o = JSON.parse(raw); for (var k in o) d[k] = o[k]; d.owned = d.owned || defaults().owned; d.stats = d.stats || defaults().stats; d.streak = d.streak || {count:0,last:''}; }
+      else { var old = parseInt(localStorage.getItem('cay-tepsisi-best')||'0',10); if (old) d.best = old; }
+    }catch(e){}
+    return d;
+  }
+  var P = load();
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(P)); }catch(e){} }
+  function pack(){ for (var i=0;i<PACKS.length;i++) if (PACKS[i].id===P.pack) return PACKS[i]; return PACKS[0]; }
+  /* ---------- original art: every item is drawn in code and coloured by the theme ---------- */
+  function r1(n){ return Math.round(n*10)/10; }
+  function xy(r, deg){ var a = (deg-90)*Math.PI/180; return [r1(r*Math.cos(a)), r1(r*Math.sin(a))]; }
+  function poly(n, r, rot){ var s = []; for (var i=0;i<n;i++) s.push(xy(r,(rot||0)+i*360/n).join(' ')); return s.join(' '); }
+  function rep(n, fn){ var h = ''; for (var i=0;i<n;i++) h += fn(i); return h; }
+  var ART = {
+    rosette:function(t){ var n=t+2, w=Math.max(8,16-n); return rep(n,function(i){ return '<ellipse class="f" cx="0" cy="-29" rx="'+w+'" ry="18" transform="rotate('+r1(i*360/n)+')"/>'; }); },
+    bloom:function(t){ var n=t+2, r=Math.max(10,19-n*1.4); return rep(n,function(i){ var p=xy(29,i*360/n); return '<circle class="'+(i%2?'l o':'f')+'" cx="'+p[0]+'" cy="'+p[1]+'" r="'+r1(r)+'"/>'; }); },
+    star:function(t){ var n=t+3, s=[]; for (var i=0;i<n*2;i++) s.push(xy(i%2?25:47,i*180/n).join(' ')); return '<polygon class="f" points="'+s.join(' ')+'"/>'; },
+    gem:function(t){ var n=t+2; return '<polygon class="l o" points="'+poly(n,46)+'"/>'+rep(n,function(i){ var p=xy(46,i*360/n); return '<line class="s2" x1="0" y1="0" x2="'+p[0]+'" y2="'+p[1]+'"/>'; })+'<polygon class="f" points="'+poly(n,27,180/n)+'"/>'; },
+    drops:function(t){ var n=t+1; return rep(n,function(i){ return '<path class="f" d="M0 -47C11 -33 13 -25 0 -19C-13 -25 -11 -33 0 -47Z" transform="rotate('+r1(i*360/n)+')"/>'; }); },
+    rings:function(t){ return rep(t,function(i){ var r = t===1 ? 32 : 20+i*26/(t-1); return '<circle class="s2 w" r="'+r1(r)+'"/>'; }); },
+    orbit:function(t){ return '<circle class="s2" r="38"/><circle class="l o" r="25"/>'+rep(t,function(i){ var p=xy(38,20+i*360/t); return '<circle class="f" cx="'+p[0]+'" cy="'+p[1]+'" r="8"/>'; }); },
+    sprig:function(t){ var n=t+1, sp=Math.min(64,16*n); return rep(n,function(i){ var a = -sp+i*2*sp/(n-1); return '<path class="'+(i%2?'l o':'f')+'" d="M0 40Q-15 6 0 -40Q15 6 0 40Z" transform="rotate('+r1(a)+' 0 40)"/>'; }); },
+    hive:function(t){ var n=t+1; return rep(n,function(i){ var p=xy(30,i*360/n); return '<polygon class="'+(i%2?'l o':'f')+'" points="'+poly(6,14)+'" transform="translate('+p[0]+' '+p[1]+')"/>'; }); },
+    burst:function(t){ var n=t*2+4; return rep(n,function(i){ var a=xy(28,i*360/n), b=xy(46,i*360/n); return '<line class="s" x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'"/>'; })+'<circle class="l o" r="22"/>'; },
+    moon:function(t){ var f=t/5, rx=r1(42*Math.abs(1-2*f)); return '<circle class="l o" r="42"/>'+(t>=5 ? '<circle class="f" r="42"/>' : '<path class="f" d="M0 -42A42 42 0 0 1 0 42A'+rx+' 42 0 0 '+(f<0.5?0:1)+' 0 -42Z"/>'); },
+    waves:function(t){ return rep(t,function(i){ var y = r1((i-(t-1)/2)*17); return '<path class="s" d="M-42 '+y+'q10.5 -13 21 0t21 0t21 0t21 0"/>'; }); },
+    shell:function(t){
+      var n=t+2, pts=['0 44'], ribs='', i, a;
+      for (i=0;i<=12;i++){ a=(-36+i*6)*Math.PI/180; pts.push(r1(84*Math.sin(a))+' '+r1(44-84*Math.cos(a))); }
+      for (i=0;i<n;i++){ a=(-28+i*56/(n-1))*Math.PI/180; ribs += '<line class="s2" x1="0" y1="44" x2="'+r1(76*Math.sin(a))+'" y2="'+r1(44-76*Math.cos(a))+'"/>'; }
+      return '<polygon class="l o" points="'+pts.join(' ')+'"/>'+ribs;
+    }
+  };
+  function em(it, pk){
+    pk = pk || pack();
+    var f = ART[pk.art[it.k]] || ART.star;
+    return '<svg class="it" data-k="'+it.k+'" viewBox="-52 -52 104 104" aria-hidden="true">'+f(it.t)+(it.t>=5 ? '<circle class="s2" r="50" stroke-dasharray="1 7"/>' : '')+'<circle class="c" r="15"/><text class="n" dy=".35em">'+it.t+'</text></svg>';
+  }
+  function ui(name){ return '<svg class="ic" aria-hidden="true"><use href="#i-'+name+'"/></svg>'; }
+  var COIN = ui('coin'), LOCK = ui('lock'), FIRE = ui('fire');
+
+  /* ---------- daily missions and streak ---------- */
+  function ensureMissions(){
+    var day = dayKey();
+    if (P.missions && P.missions.day===day) return;
+    var r = mulberry(seedFrom('gorev-'+day)), ids = Object.keys(POOL), list = [];
+    for (var i=0;i<3;i++){
+      var id = ids.splice(Math.floor(r()*ids.length),1)[0], m = POOL[id];
+      list.push({id:id, target:m.t[Math.floor(r()*m.t.length)], prog:0, done:false});
+    }
+    P.missions = {day:day, list:list}; save();
+  }
+  function bump(id, val, how){
+    ensureMissions();
+    var changed = false;
+    P.missions.list.forEach(function(m){
+      if (m.id!==id || m.done) return;
+      var np = how==='add' ? m.prog+val : Math.max(m.prog,val);
+      if (np===m.prog) return;
+      m.prog = np; changed = true;
+      if (m.prog >= m.target){
+        m.prog = m.target; m.done = true; P.credits += POOL[id].r;
+        floatText('Görev tamam! +'+POOL[id].r+' kredi', $('hint')); sfx('coin');
+      }
+    });
+    if (changed) save();
+  }
+  function renderMissions(){
+    ensureMissions();
+    var h = '<div class="mh"><span>Günlük görevler</span><span>Seri: '+streakNow()+' gün</span></div>';
+    P.missions.list.forEach(function(m){
+      h += '<div class="mr'+(m.done?' done':'')+'"><span class="ck">'+ui(m.done?'check':'box')+'</span><span class="tx">'+POOL[m.id].txt(m.target)+'</span><span class="pg">'+fmt(Math.min(m.prog,m.target))+'/'+fmt(m.target)+'</span><b>+'+POOL[m.id].r+'</b></div>';
+    });
+    ['misStart','misEnd','misSet'].forEach(function(id){ $(id).innerHTML = h; });
+  }
+  function streakNow(){ return (P.streak.last===dayKey() || P.streak.last===dayKey(-1)) ? P.streak.count : 0; }
+  function streakTick(){
+    var t = dayKey();
+    if (P.streak.last===t) return 0;
+    P.streak.count = P.streak.last===dayKey(-1) ? P.streak.count+1 : 1;
+    P.streak.last = t;
+    var r = STREAK_REWARD[P.streak.count] || 0;
+    P.credits += r;
+    return r;
+  }
+
+  /* ---------- rng ---------- */
+  var mode = 'daily', S = null, actx = null;
+  function dayKey(off){ var d = new Date(Date.now()+3*3600*1000+(off||0)*86400000); return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0'); }
+  function seedFrom(s){ var h=2166136261; for (var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); } return h>>>0; }
+  function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+  /* ---------- game state ---------- */
+  function attachRng(){
+    S.rng = function(){
+      S.rs = (S.rs + 0x6D2B79F5) | 0;
+      var t = Math.imul(S.rs ^ S.rs>>>15, 1 | S.rs);
+      t = t + Math.imul(t ^ t>>>7, 61 | t) ^ t;
+      return ((t ^ t>>>14)>>>0)/4294967296;
+    };
+  }
+  function saveGame(){
+    if (!S || S.over || S.busy || S.placed<1) return;
+    var c = {};
+    for (var k in S){ if (k!=='rng' && k!=='busy') c[k] = S[k]; }
+    P.game = {mode:mode, s:c};
+    save();
+  }
+  function restoreGame(){
+    try{
+      var g = P.game;
+      if (!g || !g.s || !g.s.plates || g.s.plates.length!==PLATES || !g.s.belt || !g.s.belt.length) return false;
+      S = JSON.parse(JSON.stringify(g.s));
+      S.busy = false; S.over = false;
+      attachRng(); setMode(g.mode==='daily' ? 'daily' : 'free');
+      refill(); buildTrays(); render();
+      $('start').hidden = true;
+      checkStuck();
+      if (!S.over){ render(); setHint('Kaldığın yerden devam ediyorsun.'); }
+      return true;
+    }catch(e){ P.game = null; S = null; return false; }
+  }
+  function newGame(){
+    var seed = mode==='daily' ? seedFrom('parca-'+dayKey()) : (Math.random()*4294967296)>>>0;
+    S = {plates:[], belt:[], gen:[], score:0, merges:0, wholes:0, bins:1, undos:1, bought:{bin:0,undo:0},
+         combo:0, heat:0, cold:0, fire:0, over:false, busy:false, stuck:false, rs:seed|0, max:{t:1,k:0}, placed:0, snap:null};
+    attachRng();
+    for (var i=0;i<PLATES;i++) S.plates.push({k:-1,t:0,n:0,d:0});
+    refill(); buildTrays(); render();
+  }
+  function kindCount(){ return (S.merges+S.wholes) >= 10 ? 4 : 3; }
+  function normal(){ return {k:Math.floor(S.rng()*kindCount()), t:1, d:0}; }
+  function fragPending(){ return S.belt.some(function(x){return x.d;}) || S.gen.some(function(x){return x.d;}); }
+  function genBlock(){
+    if (S.placed + S.belt.length >= 6 && !fragPending() && S.rng() < 0.12){
+      var d = S.rng() < 0.65 ? 3 : 5, k = Math.floor(S.rng()*kindCount()), t = d===3 ? 3 : 4, out = [];
+      for (var i=0;i<d;i++){ out.push({k:k,t:t,d:d}); if (i<d-1 && S.rng()<0.55) out.push(normal()); }
+      return out;
+    }
+    return [normal()];
+  }
+  function refill(){ while (S.belt.length < 5){ if (!S.gen.length) S.gen = genBlock(); S.belt.push(S.gen.shift()); } }
+  function need(p){ return p.d || CAP; }
+  function canPlace(p,it){ if (p.n===0) return true; return p.k===it.k && p.t===it.t && p.d===it.d && p.n < need(p); }
+  function anyPlace(it){ return S.plates.some(function(p){ return canPlace(p,it); }); }
+  function price(kind){ return BOOST[kind].base * Math.pow(2, S.bought[kind]); }
+  function track(it){ if (it.t > S.max.t) S.max = {t:it.t,k:it.k}; bump('tier', it.t, 'max'); }
+  function cool(){ if (S.fire>0) S.fire--; S.cold++; if (S.cold>=5){ S.heat = 0; S.cold = 0; } }
+
+  function snapshot(){
+    S.snap = JSON.stringify({plates:S.plates,belt:S.belt,gen:S.gen,score:S.score,merges:S.merges,wholes:S.wholes,bins:S.bins,combo:S.combo,heat:S.heat,cold:S.cold,fire:S.fire,max:S.max,placed:S.placed});
+  }
+
+  /* ---------- rendering ---------- */
+  function buildTrays(){
+    var box = $('trays'); box.innerHTML = '';
+    S.plates.forEach(function(_,i){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'tray'; b.id = 't'+i;
+      b.addEventListener('click', function(){ tap(i); });
+      box.appendChild(b);
+    });
+  }
+  function setHint(txt, warn){ var h=$('hint'); h.textContent = txt; h.classList.toggle('warn', !!warn); }
+
+  function render(){
+    var it = S.belt[0], cur = $('cur');
+    cur.dataset.k = it.k;
+    cur.classList.toggle('frag', !!it.d);
+    var pie = $('curPie'); pie.hidden = !it.d;
+    if (it.d){ pie.style.setProperty('--p', (100/it.d).toFixed(2)); pie.style.setProperty('--d', it.d); }
+    $('curE').innerHTML = em(it);
+    $('curL').textContent = it.d ? ('1/'+it.d) : it.t;
+    var nx = '';
+    for (var i=1;i<=3;i++){ var q = S.belt[i]; nx += '<div class="nx" data-k="'+q.k+'"'+(q.d?' data-f="1/'+q.d+'"':'')+'>'+em(q)+'</div>'; }
+    $('nexts').innerHTML = nx;
+    $('score').textContent = fmt(S.score);
+    $('best').textContent = fmt(P.best);
+    $('pend').textContent = '+'+fmt(Math.floor(S.score*RATE));
+    $('seri').innerHTML = FIRE+streakNow();
+    var hp = $('heat').querySelectorAll('i');
+    for (var hi=0;hi<hp.length;hi++) hp[hi].classList.toggle('on', S.fire>0 || hi<S.heat);
+    $('app').classList.toggle('fire', S.fire>0 && !S.over);
+    $('cr').textContent = fmt(P.credits);
+    var can = anyPlace(it);
+    S.plates.forEach(function(p,i){
+      var el = $('t'+i), h = '';
+      if (p.n>0){ el.dataset.k = p.k; } else { delete el.dataset.k; }
+      el.dataset.n = p.n;
+      el.classList.toggle('frag', p.n>0 && p.d>0);
+      if (p.n>0 && p.d){
+        h = '<span class="pie" style="--p:'+(p.n/p.d*100).toFixed(2)+';--d:'+p.d+'"></span><span class="fe">'+em(p)+'</span><span class="fc">'+p.n+'/'+p.d+'</span>';
+        el.setAttribute('aria-label', 'Parçalı tepsi: seviye '+p.t+' eşya, '+p.n+'/'+p.d);
+      } else {
+        h = '<span class="in">';
+        for (var j=0;j<p.n;j++) h += '<span>'+em(p)+'</span>';
+        for (var j2=p.n;j2<CAP;j2++) h += '<i class="dot"></i>';
+        h += '</span>';
+        el.setAttribute('aria-label', p.n ? ('Tepsi: '+p.n+' adet seviye '+p.t+' eşya') : 'Boş tepsi');
+      }
+      el.innerHTML = h;
+      el.classList.toggle('ok', !S.over && !S.busy && canPlace(p,it));
+    });
+    boostBtn('bin', S.bins, true);
+    boostBtn('undo', S.undos, !!S.snap);
+    $('endBtn').hidden = S.over || can;
+    $('app').dataset.busy = S.busy ? '1' : '';
+
+    if (S.over) setHint('Oyun bitti.');
+    else if (S.stuck) setHint('Yer kalmadı. Krediyle güç al ya da Bitir’e dokun.', true);
+    else if (!can) setHint(S.bins>0 && S.snap && S.undos>0 ? 'Yer yok: çöpe at, geri al ya da bitir.' : (S.bins>0 ? 'Yer yok: çöpe at ya da bitir.' : 'Yer yok: geri al ya da bitir.'), true);
+    else if (S.fire>0) setHint('ATEŞ MODU: puanlar x2 · '+S.fire+' hamle kaldı');
+    else if (it.d) setHint('Parçalı eşya: '+it.d+' parçayı aynı tepsiye topla, bütün olsun.');
+    else if (S.combo>1) setHint('Zincir x'+S.combo+'!');
+    else setHint('Eşyayı parlayan tepsilerden birine koy.');
+  }
+  function boostBtn(kind, n, usable){
+    var b = $(kind), c = $(kind+'N');
+    var stuckNeed = !S.over && !anyPlace(S.belt[0]);
+    if (n>0){ c.textContent = n; c.classList.remove('price'); b.disabled = S.over || !usable; }
+    else { c.innerHTML = COIN+fmt(price(kind)); c.classList.add('price'); b.disabled = S.over || (kind==='undo' && !S.snap); }
+    b.classList.toggle('need', stuckNeed && !b.disabled && (n>0 || S.stuck));
+    b.setAttribute('aria-label', BOOST[kind].label+(n>0?(': '+n+' hak'):(': '+price(kind)+' krediyle al')));
+  }
+
+  function floatText(txt, el){
+    var r = el.getBoundingClientRect(), f = document.createElement('div');
+    f.className = 'fl'; f.textContent = txt;
+    f.style.left = (r.left + r.width/2)+'px'; f.style.top = (r.top + r.height/3)+'px';
+    document.body.appendChild(f); setTimeout(function(){ f.remove(); }, 1000);
+  }
+  function anim(el, cls, ms){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(function(){ el.classList.remove(cls); }, ms||300); }
+
+  /* ---------- sound ---------- */
+  function tone(f, d, type, vol, delay){
+    if (!P.sound) return;
+    try{
+      actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+      var t0 = actx.currentTime+(delay||0), o = actx.createOscillator(), g = actx.createGain();
+      o.type = type||'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(vol||0.12,t0+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+      o.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0+d+0.02);
+    }catch(e){}
+  }
+  var SCALE = [262,294,330,392,440,523,587,659,784];
+  function sfx(kind, t){
+    if (kind==='place') tone(SCALE[Math.min(t-1,6)], .12, 'triangle', .12);
+    else if (kind==='merge'){ var b = SCALE[Math.min(t-1,5)]; tone(b,.14,'triangle',.14); tone(b*1.25,.14,'triangle',.12,.07); tone(b*1.5,.22,'triangle',.12,.14); }
+    else if (kind==='whole'){ tone(392,.12,'square',.07); tone(523,.12,'square',.07,.08); tone(659,.12,'square',.07,.16); tone(784,.3,'triangle',.12,.24); }
+    else if (kind==='coin'){ tone(988,.08,'square',.06); tone(1319,.18,'square',.06,.07); }
+    else if (kind==='no') tone(140,.14,'square',.06);
+    else if (kind==='bin') tone(220,.18,'sawtooth',.05);
+    else if (kind==='undo'){ tone(523,.1,'triangle',.1); tone(392,.14,'triangle',.1,.08); }
+    else if (kind==='over'){ tone(330,.2,'triangle',.12); tone(262,.2,'triangle',.12,.16); tone(196,.4,'triangle',.12,.32); }
+    if (P.vib){ try{ if (navigator.vibrate) navigator.vibrate(kind==='merge'||kind==='whole' ? [18,30,18] : 10); }catch(e){} }
+  }
+
+  /* ---------- actions ---------- */
+  function tap(i){
+    if (!S || S.over || S.busy) return;
+    var it = S.belt[0], p = S.plates[i], el = $('t'+i);
+    if (!canPlace(p,it)){ anim(el,'shake',300); sfx('no'); return; }
+    snapshot();
+    S.belt.shift();
+    if (p.n===0){ p.k = it.k; p.t = it.t; p.d = it.d; }
+    p.n++; S.placed++; S.score += it.t;
+    sfx('place', it.t);
+    if (p.n === need(p)){
+      S.busy = true; render(); anim(el,'pop',240);
+      el.classList.add('merging');
+      setTimeout(function(){ complete(i, el); }, 300);
+    } else {
+      S.combo = 0; cool(); after(); anim(el,'pop',240);
+    }
+  }
+
+  function complete(i, el){
+    var p = S.plates[i], it = {k:p.k, t:p.t, d:p.d}, gain, mult = S.fire>0 ? 2 : 1;
+    S.combo++;
+    el.classList.remove('merging');
+    if (it.d){
+      gain = it.t*30*S.combo*mult; S.wholes++; P.stats.wholes++; bump('whole',1,'add');
+      S.belt.unshift({k:it.k, t:it.t, d:0}); track(it);
+      floatText('Bütün! +'+gain, el); sfx('whole');
+    } else {
+      gain = it.t*20*S.combo*mult; S.merges++; P.stats.merges++; bump('merge',1,'add');
+      floatText('+'+gain, el); sfx('merge', it.t);
+      if (it.t < MAXT){ var up = {k:it.k, t:it.t+1, d:0}; S.belt.unshift(up); track(up); }
+      else { S.score += 300; setTimeout(function(){ floatText('Ziyafet! +300', el); }, 250); }
+      if (S.merges%3===0 && S.bins<3) S.bins++;
+      if (S.merges%5===0 && S.undos<2) S.undos++;
+    }
+    S.score += gain; bump('score', S.score, 'max');
+    if (S.fire>0){ S.fire--; }
+    else {
+      S.heat++; S.cold = 0;
+      if (S.heat>=3){
+        S.heat = 0; S.fire = FIRE_LEN; bump('fire',1,'add');
+        setTimeout(function(){ floatText('ATEŞ MODU x2!', $('cur')); sfx('whole'); }, 200);
+      }
+    }
+    p.n = 0; p.k = -1; p.t = 0; p.d = 0;
+    S.busy = false;
+    after();
+  }
+
+  function after(){
+    refill(); checkStuck(); if (!S.over){ render(); saveGame(); }
+  }
+  function checkStuck(){
+    S.stuck = false;
+    if (anyPlace(S.belt[0]) || S.bins>0 || (S.undos>0 && S.snap)) return;
+    var cheapest = Math.min(price('bin'), S.snap ? price('undo') : Infinity);
+    if (P.credits >= cheapest) S.stuck = true; else gameOver();
+  }
+
+  function binTap(){
+    if (!S || S.over || S.busy) return;
+    if (S.bins<1){ buy('bin'); return; }
+    snapshot();
+    S.bins--; S.belt.shift(); S.combo = 0; sfx('bin');
+    after();
+  }
+  function undoTap(){
+    if (!S || S.over || S.busy) return;
+    if (S.undos<1){ buy('undo'); return; }
+    if (!S.snap) return;
+    var o = JSON.parse(S.snap);
+    for (var k in o) S[k] = o[k];
+    S.undos--; S.snap = null; sfx('undo');
+    after();
+  }
+  function buy(kind){
+    var c = price(kind);
+    if (kind==='undo' && !S.snap) return;
+    if (P.credits < c){ sfx('no'); setHint('Yeterli kredi yok: '+fmt(c)+' kredi gerekli.', true); return; }
+    P.credits -= c; S.bought[kind]++; save();
+    if (kind==='bin'){
+      S.bins++;
+      if (S.snap){ var o = JSON.parse(S.snap); o.bins++; S.snap = JSON.stringify(o); }
+    } else S.undos++;
+    sfx('coin'); anim($('crBtn'),'bump',500);
+    after();
+  }
+
+  function shareText(){
+    var top = 'Seviye '+S.max.t+' eşya ·';
+    var head = 'Parça Patlat' + (mode==='daily' ? ' · '+dayKey() : '');
+    return head+'\n'+top+' '+fmt(S.score)+' puan · '+S.merges+' birleşme · '+S.wholes+' bütün\nBenden yüksek yapabilir misin?\n'+location.href;
+  }
+
+  function countUp(el, from, to){
+    var t0 = performance.now(), dur = 700;
+    function step(now){ var k = Math.min(1,(now-t0)/dur); el.textContent = fmt(Math.round(from+(to-from)*k)); if (k<1) requestAnimationFrame(step); }
+    requestAnimationFrame(step);
+  }
+
+  function gameOver(){
+    if (S.over) return;
+    S.over = true; S.stuck = false;
+    var earned = Math.floor(S.score*RATE), before = P.credits;
+    var isBest = S.score > P.best;
+    P.credits += earned; P.stats.games++; P.game = null;
+    var bonus = streakTick(); bump('games',1,'add');
+    if (isBest) P.best = S.score;
+    save(); render(); sfx('over');
+    $('endT').textContent = isBest ? 'Yeni rekor!' : 'Tepsiler doldu';
+    $('endS').textContent = fmt(S.score);
+    $('endI').innerHTML = em(S.max);
+    $('endM').textContent = S.merges+' birleşme · '+S.wholes+' bütün';
+    $('endC').textContent = '+'+fmt(earned);
+    $('endB').textContent = (isBest ? 'Bu senin en yüksek skorun.' : 'Rekorun: '+fmt(P.best)) + ' Serin: '+P.streak.count+' gün.' + (bonus ? ' Seri ödülü: +'+bonus+' kredi.' : '');
+    renderMissions();
+    $('shareTxt').value = shareText();
+    $('cr').textContent = fmt(before);
+    setTimeout(function(){ $('end').hidden = false; countUp($('cr'), before, P.credits); anim($('crBtn'),'bump',500); if (earned) sfx('coin'); }, 700);
+  }
+
+  /* ---------- settings ---------- */
+  var confirmId = null;
+  function owned(type, id){ return P.owned[type].indexOf(id) >= 0; }
+  function applySkin(){ if (P.skin==='iznik') delete document.body.dataset.skin; else document.body.dataset.skin = P.skin; }
+  function renderSettings(){
+    $('cr2').textContent = fmt(P.credits);
+    renderMissions();
+    $('skins').innerHTML = SKINS.map(function(s){
+      var own = owned('skin', s.id), sel = P.skin===s.id, st, cls = 'stt';
+      if (sel) st = 'Seçili'; else if (own) st = s.note || 'Seç';
+      else if (confirmId==='skin:'+s.id){ st = 'Onayla · '+COIN+fmt(s.price); cls += ' conf'; }
+      else if (P.credits < s.price){ st = LOCK+' '+COIN+fmt(s.price)+' gerekli'; }
+      else { st = LOCK+' '+COIN+fmt(s.price); cls += ' buy'; }
+      var sw = s.sw.map(function(c){ return '<i style="background:'+c+'"></i>'; }).join('');
+      return '<button type="button" class="opt" data-type="skin" data-id="'+s.id+'" aria-pressed="'+sel+'"><span class="sw">'+sw+'</span><span class="on">'+s.name+'</span><span class="'+cls+'">'+st+'</span></button>';
+    }).join('');
+    $('packs').innerHTML = PACKS.map(function(pk){
+      var own = owned('pack', pk.id), sel = P.pack===pk.id, st, cls = 'stt';
+      if (sel) st = 'Seçili'; else if (own) st = 'Seç';
+      else if (confirmId==='pack:'+pk.id){ st = 'Onayla · '+COIN+fmt(pk.price); cls += ' conf'; }
+      else if (P.credits < pk.price){ st = LOCK+' '+COIN+fmt(pk.price)+' gerekli'; }
+      else { st = LOCK+' '+COIN+fmt(pk.price); cls += ' buy'; }
+      return '<button type="button" class="opt" data-type="pack" data-id="'+pk.id+'" aria-pressed="'+sel+'"><span class="meta"><span class="on">'+pk.name+'</span><span class="'+cls+'">'+st+'</span></span><span class="chain" aria-hidden="true">'+[1,2,3,4,5].map(function(t){ return em({k:0,t:t}, pk); }).join('')+'</span></button>';
+    }).join('');
+    $('optSound').checked = !!P.sound; $('optVib').checked = !!P.vib;
+    $('sG').textContent = fmt(P.stats.games); $('sM').textContent = fmt(P.stats.merges); $('sW').textContent = fmt(P.stats.wholes);
+  }
+  function choose(type, id){
+    var list = type==='skin' ? SKINS : PACKS, item = list.filter(function(x){ return x.id===id; })[0];
+    if (!item) return;
+    if (owned(type, id)){
+      if (type==='skin'){ P.skin = id; applySkin(); } else P.pack = id;
+      confirmId = null; save();
+    } else if (confirmId === type+':'+id){
+      if (P.credits >= item.price){
+        P.credits -= item.price; P.owned[type].push(id);
+        if (type==='skin'){ P.skin = id; applySkin(); } else P.pack = id;
+        save(); sfx('coin'); anim($('crBtn'),'bump',500);
+      }
+      confirmId = null;
+    } else if (P.credits >= item.price){ confirmId = type+':'+id; }
+    else { sfx('no'); confirmId = null; }
+    renderSettings(); if (S) render();
+  }
+  function showTab(name){
+    var bs = $('tabs').querySelectorAll('button'), ps = $('set').querySelectorAll('.pane'), i;
+    for (i=0;i<bs.length;i++) bs[i].setAttribute('aria-pressed', bs[i].dataset.tab===name);
+    for (i=0;i<ps.length;i++) ps[i].hidden = ps[i].dataset.pane!==name;
+    confirmId = null; renderSettings();
+  }
+  function openSettings(tab){ confirmId = null; renderSettings(); if (typeof tab==='string') showTab(tab); $('set').hidden = false; $('setX').focus(); }
+  function closeSettings(){ $('set').hidden = true; confirmId = null; if (S) render(); }
+
+  /* ---------- wiring ---------- */
+  function start(){ $('start').hidden = true; $('end').hidden = true; newGame(); }
+  function setMode(m){
+    mode = m;
+    $('mDaily').setAttribute('aria-pressed', m==='daily'); $('mFree').setAttribute('aria-pressed', m==='free');
+    $('modeNote').textContent = m==='daily' ? 'Bugün herkes aynı eşya sırasını alır. Skorunu arkadaşlarınla kıyasla.' : 'Her oyunda eşya sırası rastgele.';
+  }
+  $('go').addEventListener('click', start);
+  $('again').addEventListener('click', start);
+  $('bin').addEventListener('click', binTap);
+  $('undo').addEventListener('click', undoTap);
+  $('endBtn').addEventListener('click', gameOver);
+  $('gear').addEventListener('click', openSettings);
+  $('crBtn').addEventListener('click', function(){ openSettings('tema'); });
+  $('shop').addEventListener('click', function(){ openSettings('tema'); });
+  $('tabs').addEventListener('click', function(e){ var b = e.target.closest('button'); if (b) showTab(b.dataset.tab); });
+  $('setX').addEventListener('click', closeSettings);
+  $('quit').addEventListener('click', function(){ if (S && !S.over && !S.busy && S.placed>0){ closeSettings(); gameOver(); } else closeSettings(); });
+  $('set').addEventListener('click', function(e){ if (e.target === $('set')) closeSettings(); });
+  document.addEventListener('keydown', function(e){ if (e.key==='Escape' && !$('set').hidden) closeSettings(); });
+  $('skins').addEventListener('click', function(e){ var b = e.target.closest('.opt'); if (b) choose('skin', b.dataset.id); });
+  $('packs').addEventListener('click', function(e){ var b = e.target.closest('.opt'); if (b) choose('pack', b.dataset.id); });
+  $('optSound').addEventListener('change', function(){ P.sound = this.checked; save(); });
+  $('optVib').addEventListener('change', function(){ P.vib = this.checked; save(); });
+  $('mDaily').addEventListener('click', function(){ setMode('daily'); });
+  $('mFree').addEventListener('click', function(){ setMode('free'); });
+  $('copy').addEventListener('click', function(){
+    var ta = $('shareTxt'), txt = ta.value;
+    var ok = function(){ $('copy').textContent = 'Kopyalandı'; setTimeout(function(){ $('copy').textContent = 'Skoru kopyala'; }, 1500); };
+    var fallback = function(){ ta.focus(); ta.select(); try{ if (document.execCommand('copy')) ok(); }catch(e){} };
+    try{ navigator.clipboard.writeText(txt).then(ok, fallback); }catch(e){ fallback(); }
+  });
+
+  /* sample board behind the start card, so the first frame shows the game */
+  applySkin();
+  renderMissions();
+  function renderRules(){
+    var a = em({k:0,t:1});
+    $('ru1').innerHTML = a+'<span>→</span><i class="ring"></i>';
+    $('ru2').innerHTML = a+a+a;
+    $('ru3').innerHTML = em({k:2,t:3})+'<span>1/3</span>';
+  }
+  renderRules();
+  if (!restoreGame()){
+    newGame();
+    S.plates[0] = {k:0,t:1,n:2,d:0}; S.plates[1] = {k:2,t:3,n:2,d:3}; S.plates[3] = {k:1,t:2,n:1,d:0};
+    S.belt[0] = {k:2,t:3,d:3};
+    render();
+  }
+  /* save once more when the app goes to the background */
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState==='hidden') saveGame(); });
+  window.addEventListener('pagehide', function(){ saveGame(); });
+})();
+</script>
+<script>
+/* auto-update: when a newer index.html is on the server, reload into it. The game is saved on every move, so nothing is lost. */
+(function(){
+  var el=document.querySelector('meta[name="build"]'); if(!el) return; var B=el.content, busy=false;
+  function check(){
+    if(busy||location.protocol==='file:') return; busy=true;
+    fetch(location.pathname+'?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():'';}).then(function(t){
+      busy=false; var m=t.match(/<meta name="build" content="([^"]+)"/);
+      if(m&&m[1]!==B){ location.replace(location.pathname+'?v='+encodeURIComponent(m[1])); }
+    }).catch(function(){busy=false;});
+  }
+  check();
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') check(); });
+  setInterval(check, 15*60*1000);
+})();
+</script>
+
+</body>
+</html>
