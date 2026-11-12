@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Parça Patlat">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#10264a">
-<meta name="build" content="20261113-014140">
+<meta name="build" content="20261113-015210">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/png" href="icon.png">
 <style>
@@ -83,7 +83,6 @@ button{font:inherit;color:inherit;cursor:pointer}
 .it .w{stroke-width:5}
 .it .c{fill:var(--tray);stroke:var(--kc);stroke-width:3.5}
 .it .n{fill:var(--ink);font:700 21px var(--font-display);text-anchor:middle}
-.cur .it{font-size:1.2em}
 .ring{width:.95em;height:.95em;border-radius:50%;border:2px dashed var(--glow);display:block}
 .ck{display:flex;font-size:1.05rem}
 .st b .ic{font-size:.8em}
@@ -144,7 +143,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* trays */
 .trays{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;flex:1;min-height:0;align-content:center}
 .tray{position:relative;aspect-ratio:1;width:100%;border-radius:50%;background:var(--tray);border:4px solid var(--tray-edge);display:grid;place-items:center;padding:0;box-shadow:var(--shadow);transition:transform .12s,box-shadow .15s,border-color .15s}
-.tray .in{position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:2px;width:94%;line-height:1.1;font-size:clamp(1.3rem,7.6vw,2.05rem)}
+.tray .in{position:relative;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:0 2px;width:84%;font-family:var(--emoji);line-height:1.1;font-size:clamp(1.25rem,7.2vw,2rem)}
 .tray .dot{width:9px;height:9px;border-radius:50%;background:var(--tray-edge);opacity:.8;margin:6px}
 .tray .fe{position:relative;font-family:var(--emoji);font-size:clamp(1.8rem,10vw,2.7rem);line-height:1}
 .tray .fc{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);font:700 .72rem/1.3 var(--font-display);border-radius:999px;padding:0 7px;font-variant-numeric:tabular-nums}
@@ -226,7 +225,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sw i{width:18px;height:18px;border-radius:50%;border:1.5px solid rgba(128,128,128,.35)}
 .packs{display:flex;flex-direction:column;gap:8px}
 .packs .opt{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
-.packs .chain{display:flex;gap:3px;font-size:1.5rem;flex:none}
+.packs .chain{font-family:var(--emoji);font-size:1.3rem;letter-spacing:.06em;white-space:nowrap}
 .packs .meta{display:flex;flex-direction:column;gap:2px;min-width:0}
 .tg{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0;font-weight:700}
 .tg input{appearance:none;-webkit-appearance:none;width:48px;height:28px;border-radius:999px;background:var(--tray-edge);position:relative;cursor:pointer;flex:none;margin:0}
@@ -365,11 +364,11 @@ button{font:inherit;color:inherit;cursor:pointer}
   'use strict';
   var CAP = 3, PLATES = 6, MAXT = 5, KEY = 'parca-patlat-v1';
   var PACKS = [
-    {id:'cay', name:'Çini', price:0, art:['rosette', 'star', 'gem', 'drops']},
-    {id:'bahce', name:'Bahçe', price:400, art:['sprig', 'bloom', 'hive', 'burst']},
-    {id:'deniz', name:'Deniz', price:650, art:['waves', 'rings', 'shell', 'drops']},
-    {id:'uzay', name:'Uzay', price:950, art:['moon', 'orbit', 'star', 'burst']},
-    {id:'hayvan', name:'Kristal', price:1300, art:['gem', 'hive', 'rosette', 'rings']}
+    {id:'cay', name:'Çay Bahçesi', price:0, k:[['🍃','🍵','☕','🫖','🧿'],['🌾','🍞','🥖','🥯','🥐'],['🍇','🍒','🍓','🍑','🍉'],['🍯','🍮','🧁','🍰','🎂']]},
+    {id:'bahce', name:'Bahçe', price:400, k:[['🌱','🌿','🪴','🌳','🏡'],['🌷','🌹','🌺','🌸','💐'],['🐛','🐌','🐞','🐝','🦋'],['🥕','🥬','🥦','🌽','🎃']]},
+    {id:'deniz', name:'Deniz', price:650, k:[['💧','🫧','🌊','🐚','🪸'],['🦐','🦀','🦞','🦑','🐙'],['🐟','🐠','🐡','🐬','🐳'],['🛶','⛵','🚤','🛥️','🚢']]},
+    {id:'uzay', name:'Uzay', price:950, k:[['🌑','🌒','🌓','🌔','🌕'],['☄️','🌍','🪐','🌌','🌀'],['🛰️','🚀','🛸','👽','👾'],['⭐','🌟','💫','✨','☀️']]},
+    {id:'hayvan', name:'Hayvanlar', price:1300, k:[['🥚','🐣','🐤','🐔','🦚'],['🐭','🐹','🐰','🦊','🐺'],['🐱','🐈','🐯','🦁','👑'],['🐸','🦎','🐊','🐉','🦖']]}
   ];
   var SKINS = [
     {id:'iznik',  name:'İznik',  price:0,   sw:['#e8f0f4','#10264a','#d6402f','#1f9a94'], note:'Cihaz temasına uyar'},
@@ -406,36 +405,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   var P = load();
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(P)); }catch(e){} }
   function pack(){ for (var i=0;i<PACKS.length;i++) if (PACKS[i].id===P.pack) return PACKS[i]; return PACKS[0]; }
-  /* ---------- original art: every item is drawn in code and coloured by the theme ---------- */
-  function r1(n){ return Math.round(n*10)/10; }
-  function xy(r, deg){ var a = (deg-90)*Math.PI/180; return [r1(r*Math.cos(a)), r1(r*Math.sin(a))]; }
-  function poly(n, r, rot){ var s = []; for (var i=0;i<n;i++) s.push(xy(r,(rot||0)+i*360/n).join(' ')); return s.join(' '); }
-  function rep(n, fn){ var h = ''; for (var i=0;i<n;i++) h += fn(i); return h; }
-  var ART = {
-    rosette:function(t){ var n=t+2, w=Math.max(8,16-n); return rep(n,function(i){ return '<ellipse class="f" cx="0" cy="-29" rx="'+w+'" ry="18" transform="rotate('+r1(i*360/n)+')"/>'; }); },
-    bloom:function(t){ var n=t+2, r=Math.max(10,19-n*1.4); return rep(n,function(i){ var p=xy(29,i*360/n); return '<circle class="'+(i%2?'l o':'f')+'" cx="'+p[0]+'" cy="'+p[1]+'" r="'+r1(r)+'"/>'; }); },
-    star:function(t){ var n=t+3, s=[]; for (var i=0;i<n*2;i++) s.push(xy(i%2?25:47,i*180/n).join(' ')); return '<polygon class="f" points="'+s.join(' ')+'"/>'; },
-    gem:function(t){ var n=t+2; return '<polygon class="l o" points="'+poly(n,46)+'"/>'+rep(n,function(i){ var p=xy(46,i*360/n); return '<line class="s2" x1="0" y1="0" x2="'+p[0]+'" y2="'+p[1]+'"/>'; })+'<polygon class="f" points="'+poly(n,27,180/n)+'"/>'; },
-    drops:function(t){ var n=t+1; return rep(n,function(i){ return '<path class="f" d="M0 -47C11 -33 13 -25 0 -19C-13 -25 -11 -33 0 -47Z" transform="rotate('+r1(i*360/n)+')"/>'; }); },
-    rings:function(t){ return rep(t,function(i){ var r = t===1 ? 32 : 20+i*26/(t-1); return '<circle class="s2 w" r="'+r1(r)+'"/>'; }); },
-    orbit:function(t){ return '<circle class="s2" r="38"/><circle class="l o" r="25"/>'+rep(t,function(i){ var p=xy(38,20+i*360/t); return '<circle class="f" cx="'+p[0]+'" cy="'+p[1]+'" r="8"/>'; }); },
-    sprig:function(t){ var n=t+1, sp=Math.min(64,16*n); return rep(n,function(i){ var a = -sp+i*2*sp/(n-1); return '<path class="'+(i%2?'l o':'f')+'" d="M0 40Q-15 6 0 -40Q15 6 0 40Z" transform="rotate('+r1(a)+' 0 40)"/>'; }); },
-    hive:function(t){ var n=t+1; return rep(n,function(i){ var p=xy(30,i*360/n); return '<polygon class="'+(i%2?'l o':'f')+'" points="'+poly(6,14)+'" transform="translate('+p[0]+' '+p[1]+')"/>'; }); },
-    burst:function(t){ var n=t*2+4; return rep(n,function(i){ var a=xy(28,i*360/n), b=xy(46,i*360/n); return '<line class="s" x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'"/>'; })+'<circle class="l o" r="22"/>'; },
-    moon:function(t){ var f=t/5, rx=r1(42*Math.abs(1-2*f)); return '<circle class="l o" r="42"/>'+(t>=5 ? '<circle class="f" r="42"/>' : '<path class="f" d="M0 -42A42 42 0 0 1 0 42A'+rx+' 42 0 0 '+(f<0.5?0:1)+' 0 -42Z"/>'); },
-    waves:function(t){ return rep(t,function(i){ var y = r1((i-(t-1)/2)*17); return '<path class="s" d="M-42 '+y+'q10.5 -13 21 0t21 0t21 0t21 0"/>'; }); },
-    shell:function(t){
-      var n=t+2, pts=['0 44'], ribs='', i, a;
-      for (i=0;i<=12;i++){ a=(-36+i*6)*Math.PI/180; pts.push(r1(84*Math.sin(a))+' '+r1(44-84*Math.cos(a))); }
-      for (i=0;i<n;i++){ a=(-28+i*56/(n-1))*Math.PI/180; ribs += '<line class="s2" x1="0" y1="44" x2="'+r1(76*Math.sin(a))+'" y2="'+r1(44-76*Math.cos(a))+'"/>'; }
-      return '<polygon class="l o" points="'+pts.join(' ')+'"/>'+ribs;
-    }
-  };
-  function em(it, pk){
-    pk = pk || pack();
-    var f = ART[pk.art[it.k]] || ART.star;
-    return '<svg class="it" data-k="'+it.k+'" viewBox="-52 -52 104 104" aria-hidden="true">'+f(it.t)+(it.t>=5 ? '<circle class="s2" r="50" stroke-dasharray="1 7"/>' : '')+'<circle class="c" r="15"/><text class="n" dy=".35em">'+it.t+'</text></svg>';
-  }
+  function em(it, pk){ pk = pk || pack(); return pk.k[it.k][it.t-1]; }
   function ui(name){ return '<svg class="ic" aria-hidden="true"><use href="#i-'+name+'"/></svg>'; }
   var COIN = ui('coin'), LOCK = ui('lock'), FIRE = ui('fire');
 
@@ -744,7 +714,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   }
 
   function shareText(){
-    var top = 'Seviye '+S.max.t+' eşya ·';
+    var top = em(S.max);
     var head = 'Parça Patlat' + (mode==='daily' ? ' · '+dayKey() : '');
     return head+'\n'+top+' '+fmt(S.score)+' puan · '+S.merges+' birleşme · '+S.wholes+' bütün\nBenden yüksek yapabilir misin?\n'+location.href;
   }
