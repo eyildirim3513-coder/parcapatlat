@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Devr-i Âlem">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{box-sizing:border-box}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Devr-i Âlem</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700;800&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
+<style>
+/* Layout: one-screen adventure. Header (notebook | title | menu), case banner, side-view room with speech bubbles, one-line hint.
+   Each era is its own committed palette, chosen from the menu: Ottoman tile blue, Byzantine purple and gold, Roman marble and red. */
+:root{
+  --bg:#e9f0f3; --surface:#ffffff; --ink:#132a4c; --ink2:#50668a; --line:#b8cbd9;
+  --accent:#c8372d; --accent-ink:#ffffff; --gold:#b88a1e; --outline:#1a2233;
+  --shadow:0 2px 0 rgba(19,42,76,.14);
+  --font-display:"Alegreya",Georgia,"Times New Roman",serif;
+  --font-body:"Alegreya Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+body[data-era="bizans"]{--bg:#1c1026;--surface:#2a1a3a;--ink:#f5ecd9;--ink2:#c2afc9;--line:#4c3463;--accent:#d9a93a;--accent-ink:#22120a;--gold:#e3b84d;--shadow:0 2px 0 rgba(0,0,0,.4);color-scheme:dark}
+body[data-era="roma"]{--bg:#efe9e1;--surface:#fbf8f3;--ink:#3a1f1a;--ink2:#7a5f55;--line:#d3c4b4;--accent:#a3271f;--accent-ink:#ffffff;--gold:#9a6b1f;--shadow:0 2px 0 rgba(58,31,26,.14);color-scheme:light}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:17px;line-height:1.4;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--accent)}
+.app{height:100%;max-width:440px;margin:0 auto;display:flex;flex-direction:column;gap:8px;min-height:0}
+
+.top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.chip{justify-self:start;display:flex;align-items:center;gap:7px;background:var(--surface);border:2px solid var(--line);border-radius:13px;padding:7px 11px;font-weight:800;box-shadow:var(--shadow)}
+.chip svg{width:19px;height:19px}
+.chip b{font-variant-numeric:tabular-nums}
+.chip.ready{border-color:var(--accent);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.05)}}
+.logo{margin:0;font-family:var(--font-display);font-weight:800;font-size:1.45rem;letter-spacing:.01em;line-height:1;text-align:center}
+.logo i{font-style:normal;color:var(--accent)}
+.menu{justify-self:end;width:46px;height:46px;border-radius:13px;background:var(--surface);border:2px solid var(--line);display:grid;place-items:center;padding:0;box-shadow:var(--shadow)}
+.menu svg{width:22px;height:22px}
+
+.case{display:flex;flex-direction:column;gap:1px;border-left:4px solid var(--accent);padding:2px 0 2px 10px}
+.case small{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2)}
+.case strong{font-family:var(--font-display);font-size:1.2rem;line-height:1.1}
+
+.stagewrap{flex:1;min-height:0;display:flex;justify-content:center;align-items:flex-start;container-type:size}
+.stage{position:relative;width:min(100cqw,calc(100cqh / 1.3));height:min(100cqh,calc(100cqw * 1.3));flex:none;border-radius:16px;overflow:hidden;border:2px solid var(--line);background:#20242c;box-shadow:var(--shadow)}
+.stage > svg{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+.npc,.exit{cursor:pointer}
+.mark{animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-1.2px)}}
+.room{position:absolute;top:8px;left:8px;background:rgba(15,18,26,.72);color:#fff;font-size:.78rem;font-weight:800;letter-spacing:.04em;border-radius:999px;padding:3px 10px;pointer-events:none}
+.credit{position:absolute;right:6px;bottom:5px;background:rgba(15,18,26,.6);color:#e8e8e8;font-size:.62rem;border-radius:6px;padding:1px 6px;pointer-events:none;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* speech bubble, anchored to whoever is speaking */
+.bub{position:absolute;z-index:3;width:82%;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:16px;padding:9px 11px 10px;display:flex;flex-direction:column;gap:5px;box-shadow:0 4px 14px rgba(0,0,0,.28)}
+.bub[hidden]{display:none}
+.bub::after{content:"";position:absolute;bottom:-9px;left:var(--tail,50%);width:14px;height:14px;background:var(--surface);border-right:2px solid var(--line);border-bottom:2px solid var(--line);transform:translateX(-50%) rotate(45deg)}
+.bub .hd{display:flex;align-items:center;gap:8px}
+.bub .av{width:34px;height:34px;border-radius:50%;background:var(--bg);border:2px solid var(--line);flex:none;overflow:hidden}
+.bub .who{font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.bub .txt{margin:0;font-size:1rem;min-height:2.8em}
+.bub .row{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.bub .step{margin-right:auto;font-size:.8rem;color:var(--ink2);font-variant-numeric:tabular-nums}
+
+.hint{margin:0;text-align:center;font-size:.92rem;color:var(--ink2);min-height:1.4em}
+.hint.got{color:var(--accent);font-weight:800}
+
+.btn{border-radius:12px;padding:8px 16px;font-weight:800;background:var(--surface);color:var(--ink);border:2px solid var(--line);box-shadow:var(--shadow)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.chip:focus-visible,.menu:focus-visible,.opt:focus-visible,.era:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+.ov{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(3px);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-bottom,0px))}
+.ov[hidden]{display:none!important}
+.card{width:100%;max-width:400px;max-height:100%;overflow:auto;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)}
+.card h2{margin:0;font-family:var(--font-display);font-size:1.6rem;line-height:1.1;text-wrap:balance}
+.card h3{margin:4px 0 0;font-family:var(--font-display);font-size:1.1rem}
+.card p{margin:0}
+.card .sub{color:var(--ink2);font-size:.9rem}
+.head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.x{width:40px;height:40px;border-radius:12px;border:2px solid var(--line);background:var(--bg);padding:0;font-size:1.1rem}
+.eye{font-size:.74rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.clue{border:2px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.clue b{font-family:var(--font-display);font-size:1.1rem}
+.clue .fact{font-size:.88rem;color:var(--ink2);border-top:1px dashed var(--line);padding-top:6px;margin-top:2px}
+.clue.empty{border-style:dashed;color:var(--ink2)}
+.opt{text-align:left;border:2px solid var(--line);background:var(--bg);border-radius:13px;padding:11px 13px;font-weight:700}
+.opt.bad{border-color:var(--accent);opacity:.55;text-decoration:line-through}
+.note{border-radius:13px;padding:10px 12px;background:var(--bg);font-size:.93rem}
+.note b{display:block;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
+.era{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;border:2px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 12px}
+.era[aria-pressed="true"]{border-color:var(--accent)}
+.era .sw{display:flex;gap:4px;flex:none}
+.era .sw i{width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(128,128,128,.4)}
+.era strong{font-family:var(--font-display);font-size:1.15rem;display:block;line-height:1.1}
+.era small{color:var(--ink2);font-size:.82rem;display:block}
+.src{margin:0;padding-left:18px;font-size:.86rem;display:flex;flex-direction:column;gap:4px}
+.warn{color:var(--accent);font-weight:700;min-height:1.3em}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<main class="app" id="app">
+  <header class="top">
+    <button class="chip" id="bookBtn" type="button" aria-label="İpucu defteri">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11M9 8h6"/></svg>
+      <span>Defter</span><b id="clueN">0/3</b>
+    </button>
+    <h1 class="logo">Devr-i <i>Âlem</i></h1>
+    <button class="menu" id="menuBtn" type="button" aria-label="Menü: dönemler ve kaynaklar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </header>
+
+  <div class="case"><small id="place"></small><strong id="caseT"></strong></div>
+
+  <div class="stagewrap">
+    <div class="stage" id="stage">
+      <svg id="scene" viewBox="0 0 100 130" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Oyun sahnesi"></svg>
+      <span class="room" id="roomN"></span>
+      <span class="credit" id="credit" hidden></span>
+      <div class="bub" id="bub" hidden aria-live="polite">
+        <div class="hd"><span class="av" id="av"></span><span class="who" id="who"></span></div>
+        <p class="txt" id="txt"></p>
+        <div class="row"><span class="step" id="step"></span><button class="btn primary" id="next" type="button">Devam</button></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint" id="hint"></p>
+</main>
+
+<div class="ov" id="intro" hidden role="dialog" aria-modal="true" aria-labelledby="introT">
+  <div class="card">
+    <span class="eye" id="introP"></span>
+    <h2 id="introT"></h2>
+    <p id="introX"></p>
+    <p class="sub">Kişilerle konuş, kapılardan öteki odaya geç, ipuçlarını defterine topla ve vakayı çöz. Sağ üstteki menüden başka bir döneme geçebilirsin.</p>
+    <button class="btn primary" id="introGo" type="button">Başla</button>
+  </div>
+</div>
+
+<div class="ov" id="book" hidden role="dialog" aria-modal="true" aria-labelledby="bookT">
+  <div class="card">
+    <div class="head"><h2 id="bookT">İpucu defteri</h2><button class="x" id="bookX" type="button" aria-label="Kapat">✕</button></div>
+    <div id="clues" style="display:flex;flex-direction:column;gap:8px"></div>
+    <button class="btn primary" id="solveBtn" type="button">Vakayı çöz</button>
+  </div>
+</div>
+
+<div class="ov" id="solve" hidden role="dialog" aria-modal="true" aria-labelledby="solveT">
+  <div class="card">
+    <div class="head"><h2 id="solveT"></h2><button class="x" id="solveX" type="button" aria-label="Kapat">✕</button></div>
+    <div id="opts" style="display:flex;flex-direction:column;gap:8px"></div>
+    <p class="warn" id="solveW"></p>
+  </div>
+</div>
+
+<div class="ov" id="end" hidden role="dialog" aria-modal="true" aria-labelledby="endT">
+  <div class="card">
+    <span class="eye">Vaka çözüldü</span>
+    <h2 id="endT"></h2>
+    <p id="endX"></p>
+    <div class="note"><b>Gerçek</b><span id="endR"></span></div>
+    <div class="note"><b>Kurgu</b><span id="endF"></span></div>
+    <button class="btn primary" id="endGo" type="button"></button>
+    <button class="btn" id="endStay" type="button">Sahnede dolaş</button>
+  </div>
+</div>
+
+<div class="ov" id="menu" hidden role="dialog" aria-modal="true" aria-labelledby="menuT">
+  <div class="card">
+    <div class="head"><h2 id="menuT">Dönemler</h2><button class="x" id="menuX" type="button" aria-label="Kapat">✕</button></div>
+    <div id="eras" style="display:flex;flex-direction:column;gap:8px"></div>
+    <button class="btn" id="restart" type="button">Bu vakayı baştan başlat</button>
+    <h3>Kaynaklar</h3>
+    <ol class="src" id="srcs"></ol>
+    <h3>Fotoğraflar</h3>
+    <ol class="src" id="photos"></ol>
+    <p class="sub">Fotoğraflar Wikimedia Commons’tan, lisanslarına uygun olarak gösterilir. İlerlemen bu cihazda saklanır.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var KEY = 'devri-alem-v2';
+  var ORDER = ['osmanli','bizans','roma'];
+  var COMMONS = 'https://commons.wikimedia.org/wiki/';
+  var ERAS = {
+    osmanli:{
+      name:'Osmanlı', place:'Topkapı Sarayı · 16. yüzyıl', title:'Kayıp Ferman', sw:['#e9f0f3','#1d4e89','#c8372d'],
+      intro:'Divan toplantısı az önce bitti. Tuğralı bir ferman, mürekkebi kurusun diye bırakıldığı rahleden kayboldu. Ulak yola çıkmadan fermanı bul.',
+      first:'a',
+      rooms:{
+        a:{name:'Divan kapısı', bg:'divan', photo:{file:'4146 Istanbul - Topkapi - Divano.jpg', by:'Giovanni Dall’Orto', lic:'atıf şartıyla serbest'},
+          exits:[{side:'right', to:'b', label:'İkinci avlu'}],
+          npcs:[
+            {id:'yeniceri', name:'Yeniçeri nöbetçi', x:22, y:108, fig:{hat:'bork', robe:'#b3261e', arm:'#8f1d18', trim:'#c9a227', belt:'#2e3b55', beard:'must', item:'spear'},
+              lines:['Dur yolcu. Divan dağılalı beri bu kapıdan kuş uçmadı.','Yalnız mutfaktan gelen bir çırak geçti. Elinde örtülü bir tepsiyle avluya çıktı.','Örtüsünü kaldırıp bakmadım. Sofraya el uzatılmaz.'],
+              clue:'c1', again:'Dedim ya: kapıdan yalnız tepsiyi taşıyan çırak çıktı.'},
+            {id:'katip', name:'Divan kâtibi', x:74, y:112, fig:{hat:'kavuk', robe:'#2e6b4f', arm:'#245540', trim:'#c8372d', belt:'#c9a227', beard:'full', item:'scroll'},
+              lines:['Fermanın tuğrası çekildi, nişancı efendi bana teslim etti.','Mürekkep yaştı. Kurusun diye rahleye, yemek tepsisinin hemen yanına bıraktım.','Döndüğümde tepsi de yoktu, ferman da.'],
+              clue:'c2', again:'Ferman yaş mürekkeple, tepsinin yanında duruyordu. Başka bir şey bilmiyorum.'},
+            {id:'rahle', name:'Boş rahle', x:50, y:118, prop:'rahle',
+              lines:['Rahlenin üstü boş. Tahtada yuvarlak bir tepsi izi ve bir damla mürekkep var.'], again:'Tepsi izi ve bir damla mürekkep. Başka bir şey yok.'}
+          ]},
+        b:{name:'İkinci avlu, mutfak yanı', bg:'avlu', photo:{file:'Second Court Topkapi 2007 80.JPG', by:'Gryffindor', lic:'kamu malı'},
+          exits:[{side:'left', to:'a', label:'Divan kapısı'}],
+          npcs:[
+            {id:'icoglan', name:'Saray içoğlanı', x:66, y:108, fig:{hat:'takke', robe:'#3d5a9a', arm:'#30487c', trim:'#c9a227', belt:'#c8372d'},
+              need:'c2', needLine:'Bir şey mi kayboldu? Önce kâtip efendiyle konuş ki neyi aradığını bileyim.',
+              lines:['Tepsiyi taşıyan çırağı az önce burada gördüm.','Tepsinin altındaki örtünün ucunda taze bir mürekkep lekesi vardı. Aşçı işi değil o leke.'],
+              clue:'c3', again:'Örtüdeki leke tazeydi, gözümle gördüm.'},
+            {id:'tepsi', name:'Örtülü tepsi', x:30, y:116, prop:'tepsi',
+              lines:['Mutfak kapısının önünde örtülü bir tepsi duruyor. Örtünün bir ucu koyu lekeli.'], again:'Örtünün ucu lekeli. Altında ne var acaba?'}
+          ]}
+      },
+      clues:{
+        c1:{t:'Kapıdan tek çıkan', x:'Toplantıdan sonra kapıdan yalnızca örtülü tepsiyi taşıyan mutfak çırağı çıktı.', f:'Yeniçerilerin ocak kazanlarını meydana çıkarması, yani “kazan kaldırma”, ayaklanmaya niyetlendiklerinin göstergesiydi. Komutanlarına “çorbacı” denirdi. [3]'},
+        c2:{t:'Yaş mürekkep', x:'Ferman, mürekkebi yaşken yemek tepsisinin hemen yanına bırakılmıştı.', f:'Tuğra padişahın işaretidir. Padişahın tuğrasını çekmekle görevli yüksek memura nişancı denirdi; taşraya giden fermanlarda tuğra mutlaka bulunurdu. [2]'},
+        c3:{t:'Örtüdeki leke', x:'Tepsi örtüsünün ucunda taze bir mürekkep lekesi görüldü.', f:'Divan-ı Hümayun, Topkapı Sarayı’nın ikinci avlusundaki Kubbealtı’nda toplanırdı. Padişah görüşmeleri kafesli bir pencerenin arkasından dinleyebilirdi. [1]'}
+      },
+      q:'Ferman şimdi nerede?', opts:['Kapıdan çıkıp şehre gitti','Kâtibin kesesinde','Mutfak kapısında, tepsi örtüsünün altında','Padişahın kafesli penceresinde'], ans:2,
+      end:'Kimse çalmamış. Yaş mürekkepli ferman tepsi örtüsüne yapışmış ve çırakla birlikte mutfağa gitmiş. Ulak yola vaktinde çıktı.',
+      real:'Divan-ı Hümayun 16. yüzyılda haftada dört beş gün, Topkapı Sarayı’nın ikinci avlusundaki Kubbealtı’nda toplanırdı. Tuğra, nişancı ve yeniçerilerin kazan kaldırması gerçektir. [1][2][3]',
+      fic:'Kayıp ferman olayı, tepsi ve buradaki kişiler bu oyun için uyduruldu.'
+    },
+    bizans:{
+      name:'Bizans', place:'Konstantinopolis · 6. yüzyıl', title:'İpeğin Sırrı', sw:['#1c1026','#6b2d84','#d9a93a'],
+      intro:'İmparator Justinianus ipeğin sırrını istiyor. Doğudan dönen bir yolcunun ipek böceği yumurtası getirdiği söyleniyor ama muhafızlar hiçbir şey bulamadı. Yumurtalar nerede saklı?',
+      first:'a',
+      rooms:{
+        a:{name:'Hipodrom', bg:'hipodrom', photo:{file:'Hippodrome of Constantinople (8394994973).jpg', by:'Jorge Láscar', lic:'CC BY 2.0'},
+          exits:[{side:'right', to:'b', label:'İpek atölyesi'}],
+          npcs:[
+            {id:'muhafiz', name:'Saray muhafızı', x:24, y:108, fig:{hat:'migfer', robe:'#7a2330', arm:'#5f1a25', trim:'#d9a93a', belt:'#3a2a1a', beard:'must', item:'spear'},
+              lines:['Limandan gelen herkesin heybesini, kuşağını tek tek aradım.','Keşişin yanında yalnız asası vardı. Yaşlı adam ona yaslanıyor, asaya dokunmadım.'],
+              clue:'b1', again:'Heybeler ve kuşaklar temiz. Asaya bakmadım, o kadar.'},
+            {id:'arabaci', name:'Mavilerin arabacısı', x:70, y:114, fig:{hat:'band', robe:'#2c5fa8', arm:'#234c87', trim:'#f5ecd9', belt:'#f5ecd9'},
+              need:'b1', needLine:'Bugün Maviler kazandı! Sen kimi arıyorsun? Önce muhafıza sor.',
+              lines:['O keşişi yolda gördüm.','Asası taşa vurdukça tok değil, kof bir ses çıkarıyordu. İçi boş gibi.'],
+              clue:'b3', again:'Kof ses diyorum. Dolu ağaç öyle ötmez.'}
+          ]},
+        b:{name:'İpek atölyesi', bg:'atolye',
+          exits:[{side:'left', to:'a', label:'Hipodrom'}],
+          npcs:[
+            {id:'dokumaci', name:'İpek dokumacısı', x:30, y:110, fig:{hat:'scarf', robe:'#2f6f73', arm:'#245659', trim:'#e3b84d', belt:'#e3b84d'},
+              lines:['İpek böceğinin yumurtası haşhaş tanesi kadar küçüktür.','Yolda ezilmemeli. Sert ve kapalı bir şeyin içinde taşınmış olmalı.'],
+              clue:'b2', again:'Küçücük şeylerdir. Sert, kapalı bir kap ister.'},
+            {id:'kesis', name:'Yolcu keşiş', x:72, y:114, fig:{hat:'hood', robe:'#4a3b34', arm:'#3b2f29', beard:'full', hair:'#c9c4bc', item:'staff'},
+              lines:['Yol uzundu evladım. Asam olmasa buraya varamazdım.'], again:'Asamı bırakmam evladım, dizlerim tutmuyor.'}
+          ]}
+      },
+      clues:{
+        b1:{t:'Aranmayan tek şey', x:'Muhafız heybeleri ve kuşakları aradı ama keşişin asasına dokunmadı.', f:'İpek Bizans’ta çok değerliydi. İmparatorluk moruyla boyanmış ipek giysiler neredeyse yalnızca seçkinlere ayrılmıştı. [6]'},
+        b2:{t:'Küçük ve kırılgan', x:'Yumurtalar çok küçük. Sert ve kapalı bir şeyin içinde taşınmış olmalı.', f:'Tarihçi Prokopios, Hindistan’dan gelen keşişlerin Justinianus’a ipek böceği yumurtası getirdiğini yazar. [5]'},
+        b3:{t:'Kof ses', x:'Keşişin asası yere vurunca içi boşmuş gibi ses çıkarıyor.', f:'Hipodrom’daki yarışların taraftar grupları Maviler ve Yeşiller, Ocak 532’deki Nika Ayaklanması’nda birleşip yönetime karşı çıktı. “Nika”, yarışlardaki “Kazan!” tezahüratıydı. [4]'}
+      },
+      q:'Yumurtalar nerede saklı?', opts:['Keşişin heybesinde','İçi oyuk asanın içinde','Dokumacının tezgâhında','Arabacının kuşağında'], ans:1,
+      end:'Yumurtalar içi oyulmuş asanın içindeydi. İpeğin sırrı artık Konstantinopolis’te.',
+      real:'Prokopios keşişlerden söz eder. Yumurtaların bir asanın içinde taşındığı ayrıntısı daha geç bir anlatımda, Theophanes’te geçer ve orada kaçakçı bir Pers’tir. Tarihçiler bu hikâyeyi efsane niteliğinde görür. [5]',
+      fic:'Muhafız, dokumacı ve arabacı bu oyun için uyduruldu.'
+    },
+    roma:{
+      name:'Antik Roma', place:'Roma · MÖ 1. yüzyıl', title:'Şifreli Mektup', sw:['#efe9e1','#b9a48c','#a3271f'],
+      intro:'Bir ulak Forum’da bayıldı. Kesesinden tek kelimelik şifreli bir not çıktı: RVWLD. Mektubun hangi şehre gideceğini bul.',
+      first:'a',
+      rooms:{
+        a:{name:'Forum', bg:'forum',
+          exits:[{side:'right', to:'b', label:'Liman yolu'}],
+          npcs:[
+            {id:'lejyoner', name:'Lejyoner', x:22, y:108, fig:{hat:'crest', robe:'#a3271f', arm:'#7f1e18', trim:'#b9b3a8', belt:'#5a3b22', item:'spear'},
+              lines:['Ulak komutanın adamı. Notu ben buldum: R, V, W, L, D.','Komutan, mektuplarını herkes okuyamasın diye harfleri kaydırarak yazar derler.'],
+              clue:'r1', again:'Not burada: R V W L D. Gerisini ben çözemem.'},
+            {id:'yazici', name:'Yazıcı', x:76, y:112, fig:{hat:'bare', robe:'#f1ebe0', arm:'#ddd5c6', trim:'#7b2d8e', item:'scroll', hair:'#5a5550'},
+              lines:['Bu usulü bilirim. Her harfin yerine alfabede üç sonraki harf yazılır.','Okumak için tersini yap: her harften üç geri say.'],
+              clue:'r2', again:'Üç geri say, hepsi bu.'},
+            {id:'ulak', name:'Baygın ulak', x:50, y:120, prop:'lying',
+              lines:['Ulak derin derin soluyor. Yanında boş bir deri kese var.'], again:'Hâlâ baygın. Soluğu düzenli.'}
+          ]},
+        b:{name:'Liman yolu', bg:'yol', photo:{file:'Ostia Antica - Via Delle Tombe.jpg', by:'ZeWrestler', lic:'CC BY-SA 3.0'},
+          exits:[{side:'left', to:'a', label:'Forum'}],
+          npcs:[
+            {id:'tuccar', name:'Tüccar', x:60, y:112, fig:{hat:'band', robe:'#8a6a2f', arm:'#6f5525', trim:'#3a1f1a', belt:'#3a1f1a', beard:'full'},
+              need:'r2', needLine:'Harflerle aram iyidir ama neyi sayacağımı bilmiyorum. Önce Forum’daki yazıcıya sor.',
+              lines:['Sayması kolay olsun diye alfabeyi tezgâha yazdım.','A B C D E F G H I J K L M N O P Q R S T U V W X Y Z. Hadi, her harften üç geri say.'],
+              clue:'r3', again:'Alfabe defterinde yazılı. R’den üç geri say bakalım.'}
+          ]}
+      },
+      clues:{
+        r1:{t:'Kaydırılmış harfler', x:'Notta RVWLD yazıyor. Komutan harfleri kaydırarak yazıyor.', f:'SPQR, “Roma Senatosu ve Halkı” anlamına gelen Latince kısaltmadır.'},
+        r2:{t:'Üç harf', x:'Her harf, alfabede üç sonraki harfle değiştirilmiş. Çözmek için her harften üç geri sayılır.', f:'Suetonius, Caesar’ın özel mektuplarını şifreyle yazdığını ve çözmek için A yerine alfabenin dördüncü harfi D’nin konması gerektiğini aktarır. [7]'},
+        r3:{t:'Alfabe', x:'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z', f:'Oyunda sayması kolay olsun diye bugünkü 26 harfli alfabe kullanıldı.'}
+      },
+      q:'Mektup hangi şehre gidecek?', opts:['CAPUA','GENUA','OSTIA','PARMA'], ans:2,
+      end:'RVWLD, her harften üç geri sayınca OSTIA olur. Mektup Roma’nın limanına gidiyor.',
+      real:'Suetonius’un aktardığı bu yöntem bugün Sezar şifresi olarak bilinir. Ostia, Roma’nın Tiber Nehri ağzındaki limanıydı. [7]',
+      fic:'Ulak, not ve buradaki kişiler bu oyun için uyduruldu.'
+    }
+  };
+  var SOURCES = [
+    ['TDV İslâm Ansiklopedisi, “Dîvân-ı Hümâyun”','https://islamansiklopedisi.org.tr/divan-i-humayun'],
+    ['TDV İslâm Ansiklopedisi, “Tuğra”','https://islamansiklopedisi.org.tr/tugra'],
+    ['TDV İslâm Ansiklopedisi, “Yeniçeri”','https://islamansiklopedisi.org.tr/yeniceri'],
+    ['Encyclopaedia Britannica, “Nika riots”','https://www.britannica.com/topic/Nika-riots'],
+    ['American Historical Association, “Legendary Silk Heists”','https://www.historians.org/resource/legendary-silk-heists/'],
+    ['Wikipedia, “Smuggling of silkworm eggs into the Roman Empire”','https://en.wikipedia.org/wiki/Smuggling_of_silkworm_eggs_into_the_Roman_Empire'],
+    ['Suetonius, Julius Caesar’ın Hayatı 56.6 (Lexundria)','https://lexundria.com/suet_jul/56.6']
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  var NS = 'http://www.w3.org/2000/svg';
+
+  /* ---------- saved progress ---------- */
+  function blank(){ return {clues:[], solved:false, seen:false, room:null, done:{}}; }
+  var P = {era:'osmanli', eras:{}};
+  try{ var raw = localStorage.getItem(KEY); if (raw){ var o = JSON.parse(raw); if (o && o.eras) P = o; } }catch(e){}
+  ORDER.forEach(function(id){ if (!P.eras[id]) P.eras[id] = blank(); if (!P.eras[id].done) P.eras[id].done = {}; });
+  if (ORDER.indexOf(P.era) < 0) P.era = 'osmanli';
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(P)); }catch(e){} }
+  function E(){ return ERAS[P.era]; }
+  function st(){ return P.eras[P.era]; }
+  function R(){ var e = E(); return e.rooms[st().room] || e.rooms[e.first]; }
+  function has(c){ return st().clues.indexOf(c) >= 0; }
+  function total(){ return Object.keys(E().clues).length; }
+  function findNpc(id){ var r = E().rooms, k, i; for (k in r){ for (i=0;i<r[k].npcs.length;i++) if (r[k].npcs[i].id===id) return r[k].npcs[i]; } return null; }
+
+  /* ---------- characters: drawn in code, with faces, arms and hands ---------- */
+  var O = 'stroke="var(--outline)" stroke-width=".5" stroke-linejoin="round"';
+  function figure(f){
+    var skin = f.skin || '#e0b08a', hair = f.hair || '#3b2a1e', arm = f.arm || f.robe, t = f.trim || '#c9a227';
+    var h = '<ellipse cx="0" cy="0" rx="9.5" ry="2.4" fill="rgba(0,0,0,.3)"/>';
+    if (f.item==='staff') h += '<path d="M11 -45V0" stroke="#7a5a35" stroke-width="1.5" stroke-linecap="round"/>';
+    if (f.item==='spear') h += '<path d="M-11.6 -52V0" stroke="#7a5a35" stroke-width="1.2" stroke-linecap="round"/><path d="M-11.6 -58l1.8 6h-3.6z" fill="#cfd3d6" '+O+'/>';
+    h += '<path d="M-5.8 -2.6h4.8v2.4h-5.8zM1 -2.6h4.8l1 2.4h-5.8z" fill="'+(f.shoe||'#5a3b22')+'" '+O+'/>';
+    h += '<path d="M-7 -2.4L-8.6 -22Q-9.2 -33.4 -5 -35.4H5Q9.2 -33.4 8.6 -22L7 -2.4Z" fill="'+f.robe+'" '+O+'/>';
+    h += '<path d="M-5.4 -12L-6 -3M5.4 -12L6 -3M-2.6 -16L-2.9 -3M2.6 -16L2.9 -3" stroke="rgba(0,0,0,.16)" stroke-width=".5" fill="none"/>';
+    if (f.trim) h += '<path d="M-1.1 -35.2H1.1L1.4 -2.6H-1.4Z" fill="'+f.trim+'"/>';
+    if (f.belt) h += '<path d="M-8.5 -22.6H8.5L8.4 -19.6H-8.4Z" fill="'+f.belt+'" '+O+'/>';
+    /* arms and hands */
+    var lh = f.item==='spear' ? [-11.4,-25] : [-9.8,-18.2];
+    h += f.item==='spear'
+      ? '<path d="M-5.6 -35Q-11.4 -33 -12.6 -26.4L-9.6 -25.4Q-8.6 -29.4 -5 -30.6Z" fill="'+arm+'" '+O+'/>'
+      : '<path d="M-5.6 -35Q-11.8 -32 -11.5 -19.6L-8.1 -19.4Q-8.4 -27.6 -5 -30.4Z" fill="'+arm+'" '+O+'/>';
+    h += '<circle cx="'+lh[0]+'" cy="'+lh[1]+'" r="1.9" fill="'+skin+'" '+O+'/>';
+    if (f.item==='scroll' || f.item==='tray'){
+      h += '<path d="M5.6 -35Q11.6 -32 10.2 -25.2L3.6 -23L2.8 -26L6.8 -27.6Q6.6 -29.6 5 -30.4Z" fill="'+arm+'" '+O+'/>';
+      if (f.item==='scroll') h += '<rect x="-2.4" y="-28.4" width="5.6" height="7.2" rx=".9" fill="#f3ead2" '+O+'/><path d="M-1.2 -26.4h3.2M-1.2 -24.8h3.2M-1.2 -23.2h2.2" stroke="#3a4a66" stroke-width=".4"/>';
+      else h += '<ellipse cx="1.4" cy="-23.6" rx="7" ry="1.6" fill="#c9a227" '+O+'/><path d="M-4 -24Q1.4 -29.6 6.8 -24Z" fill="#f4efe6" '+O+'/>';
+      h += '<circle cx="3.2" cy="-24.4" r="1.9" fill="'+skin+'" '+O+'/>';
+    } else if (f.item==='staff'){
+      h += '<path d="M5.6 -35Q11.6 -33 12.4 -27L9.4 -25.6Q8.6 -29.4 5 -30.6Z" fill="'+arm+'" '+O+'/><circle cx="11" cy="-25.6" r="1.9" fill="'+skin+'" '+O+'/>';
+    } else {
+      h += '<path d="M5.6 -35Q11.8 -32 11.5 -19.6L8.1 -19.4Q8.4 -27.6 5 -30.4Z" fill="'+arm+'" '+O+'/><circle cx="9.8" cy="-18.2" r="1.9" fill="'+skin+'" '+O+'/>';
+    }
+    /* head */
+    h += '<rect x="-1.8" y="-37.6" width="3.6" height="3.2" fill="'+skin+'"/>';
+    if (f.hat==='hood') h += '<path d="M-6.4 -34.6Q-7.6 -48.8 0 -49Q7.6 -48.8 6.4 -34.6Z" fill="'+f.robe+'" '+O+'/>';
+    h += '<circle cx="-4.6" cy="-41.3" r="1" fill="'+skin+'" '+O+'/><circle cx="4.6" cy="-41.3" r="1" fill="'+skin+'" '+O+'/>';
+    h += '<ellipse cx="0" cy="-41.6" rx="4.7" ry="5.3" fill="'+skin+'" '+O+'/>';
+    if (f.hat==='bare' || f.hat==='band') h += '<path d="M-4.7 -42.4Q-5 -47.6 0 -47.4Q5 -47.6 4.7 -42.4Q2.6 -45.2 0 -45.2Q-2.6 -45.2 -4.7 -42.4Z" fill="'+hair+'"/>';
+    if (f.beard==='full') h += '<path d="M-4.3 -40.2Q-4.6 -34.6 0 -34.2Q4.6 -34.6 4.3 -40.2Q2.4 -37.8 0 -38Q-2.4 -37.8 -4.3 -40.2Z" fill="'+hair+'"/>';
+    h += '<ellipse cx="-1.8" cy="-42" rx="1" ry=".74" fill="#fff"/><ellipse cx="1.8" cy="-42" rx="1" ry=".74" fill="#fff"/><circle cx="-1.7" cy="-42" r=".52" fill="#2a1a12"/><circle cx="1.9" cy="-42" r=".52" fill="#2a1a12"/>';
+    h += '<path d="M-2.9 -43.5q1.1 -.6 2.1 -.1M.8 -43.6q1 -.5 2.1 .1" stroke="'+hair+'" stroke-width=".55" fill="none" stroke-linecap="round"/>';
+    h += '<path d="M0 -41.6q.9 1.6 -.1 2.1" stroke="#a8765a" stroke-width=".5" fill="none" stroke-linecap="round"/>';
+    h += '<path d="M-1.2 -37.8q1.2 .8 2.4 0" stroke="#8a4a3a" stroke-width=".5" fill="none" stroke-linecap="round"/>';
+    if (f.beard) h += '<path d="M-2.4 -38.7q1.2 -.9 2.4 -.1q1.2 -.8 2.4 .1" stroke="'+hair+'" stroke-width=".85" fill="none" stroke-linecap="round"/>';
+    /* headgear */
+    if (f.hat==='bork') h += '<path d="M-4.8 -44.8V-54.4Q0 -56.8 4.8 -54.4V-44.8Z" fill="#f6f2e9" '+O+'/><path d="M4.4 -54.6Q9.8 -53 8.6 -41" fill="none" stroke="#f6f2e9" stroke-width="2.9" stroke-linecap="round"/><rect x="-5" y="-46.4" width="10" height="2.1" fill="#c9a227" '+O+'/>';
+    else if (f.hat==='kavuk') h += '<ellipse cx="0" cy="-47.8" rx="6.7" ry="4.3" fill="#f6f2e9" '+O+'/><path d="M-5.2 -47.6q5.2 2 10.4 0M-4.2 -49.8q4.2 1.6 8.4 0" stroke="#d3ccbb" stroke-width=".5" fill="none"/><circle cx="0" cy="-51.4" r="2" fill="'+t+'" '+O+'/>';
+    else if (f.hat==='takke') h += '<path d="M-4.7 -44.6Q0 -51.4 4.7 -44.6Z" fill="'+t+'" '+O+'/>';
+    else if (f.hat==='migfer') h += '<path d="M-5.1 -43.6Q-5.3 -50.8 0 -50.8Q5.3 -50.8 5.1 -43.6Z" fill="#d9a93a" '+O+'/><path d="M0 -50.8V-54.4" stroke="#d9a93a" stroke-width="1.4" stroke-linecap="round"/><path d="M-5.1 -44.4H5.1" stroke="#a87b1f" stroke-width=".8"/>';
+    else if (f.hat==='scarf') h += '<path d="M-5.3 -39.6Q-6.2 -48.6 0 -48.6Q6.2 -48.6 5.3 -39.6L4.1 -44Q0 -46.8 -4.1 -44Z" fill="'+t+'" '+O+'/>';
+    else if (f.hat==='band') h += '<rect x="-4.9" y="-45.8" width="9.8" height="1.7" rx=".6" fill="'+t+'" '+O+'/>';
+    else if (f.hat==='crest') h += '<path d="M-5.1 -43.4Q-5.3 -50.2 0 -50.2Q5.3 -50.2 5.1 -43.4Z" fill="#b9b3a8" '+O+'/><path d="M-4 -50.2Q0 -56.8 4 -50.2Z" fill="#b3261e" '+O+'/><path d="M-5 -43.6v3.2M5 -43.6v3.2" stroke="#b9b3a8" stroke-width="1.5"/>';
+    else if (f.hat==='seyyah') h += '<ellipse cx="0" cy="-45.8" rx="7.3" ry="1.8" fill="#6b4a2b" '+O+'/><path d="M-4 -46.2Q0 -52.4 4 -46.2Z" fill="#6b4a2b" '+O+'/><path d="M-5 -34.4L7.2 -20.4" stroke="#4a3324" stroke-width="1"/><rect x="5.6" y="-21.4" width="4.8" height="4.8" rx=".8" fill="#6b4a2b" '+O+'/>';
+    return h;
+  }
+  function prop(kind){
+    if (kind==='rahle') return '<ellipse cx="0" cy="0" rx="11" ry="2.4" fill="rgba(0,0,0,.28)"/><path d="M-9 0L6 -15M9 0L-6 -15" stroke="#7a5a35" stroke-width="2.2" stroke-linecap="round"/><rect x="-10.5" y="-18" width="21" height="3" rx="1" fill="#9a7445" '+O+'/><circle cx="4" cy="-18.4" r="1" fill="#1a2233"/><ellipse cx="-3" cy="-18.2" rx="4.4" ry=".7" fill="none" stroke="#6b4a2b" stroke-width=".4"/>';
+    if (kind==='tepsi') return '<ellipse cx="0" cy="0" rx="10" ry="2.2" fill="rgba(0,0,0,.28)"/><path d="M-5 0L-4 -8H4L5 0Z" fill="#7a5a35" '+O+'/><ellipse cx="0" cy="-8.6" rx="10" ry="2.2" fill="#c9a227" '+O+'/><path d="M-8 -9Q0 -18 8 -9Q4 -7.4 0 -7.6Q-4 -7.4 -8 -9Z" fill="#f4efe6" '+O+'/><path d="M5.4 -9.6q1.8 1 2.4 .4" stroke="#1a2233" stroke-width="1.2" stroke-linecap="round" fill="none"/>';
+    return '<ellipse cx="0" cy="0" rx="15" ry="2.8" fill="rgba(0,0,0,.28)"/><path d="M-8 -6Q0 -9.6 12 -5.4Q13.6 -1.4 10.6 -.6H-8Z" fill="#8f7a63" '+O+'/><circle cx="-11.4" cy="-4.6" r="4.4" fill="#e0b08a" '+O+'/><path d="M-13 -5.4h1.6M-10.6 -5.4h1.6" stroke="#2a1a12" stroke-width=".5"/><rect x="13" y="-4.8" width="5" height="4.2" rx=".9" fill="#6b4a2b" '+O+'/>';
+  }
+
+  /* ---------- drawn backdrops (used on their own, and under a photo until it loads) ---------- */
+  function sky(a, b){ return '<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+a+'"/><stop offset="1" stop-color="'+b+'"/></linearGradient></defs><rect width="100" height="92" fill="url(#sk)"/>'; }
+  function backdrop(kind){
+    var h = '', i, x;
+    if (kind==='divan'){
+      h += '<rect width="100" height="92" fill="#1d4e89"/>';
+      for (i=0;i<3;i++){ x = 6+i*31; h += '<path d="M'+x+' 92V40Q'+(x+13)+' 14 '+(x+26)+' 40V92Z" fill="#163a66"/><path d="M'+(x+4)+' 92V43Q'+(x+13)+' 24 '+(x+22)+' 43V92Z" fill="#e9dfc6"/>'; }
+      h += '<g stroke="#b88a1e" stroke-width=".7">'; for (i=0;i<7;i++) h += '<path d="M'+(42+i*2.6)+' 44V88"/>'; for (i=0;i<9;i++) h += '<path d="M41 '+(46+i*5)+'H59"/>'; h += '</g>';
+      h += '<rect y="8" width="100" height="5" fill="#c8372d"/><rect y="13" width="100" height="1.4" fill="#b88a1e"/>';
+      for (i=0;i<10;i++) h += '<path d="M'+(5+i*10)+' 3.6l2.4 2.4-2.4 2.4-2.4-2.4z" fill="#3aa6a0"/>';
+      h += '<rect y="92" width="100" height="38" fill="#d9cfb8"/><path d="M0 92H100" stroke="#b88a1e" stroke-width="1.2"/>';
+      for (i=0;i<6;i++) h += '<path d="M'+(i*20-10)+' 130L'+(30+i*8)+' 92" stroke="#c4b89c" stroke-width=".6"/>';
+      h += '<path d="M24 100H76L84 126H16Z" fill="#9e2b25"/><path d="M28 103H72L78 123H22Z" fill="none" stroke="#b88a1e" stroke-width=".8"/>';
+    } else if (kind==='avlu'){
+      h += sky('#9cc7e4','#e6f0f3');
+      h += '<rect y="52" width="100" height="40" fill="#e3d9c3"/><rect y="48" width="100" height="5" fill="#b3261e"/>';
+      for (i=0;i<4;i++){ x = 3+i*25; h += '<path d="M'+x+' 92V66Q'+(x+10)+' 50 '+(x+20)+' 66V92Z" fill="#6f6557"/><rect x="'+(x-1.6)+'" y="64" width="2.6" height="28" fill="#f3ede0"/>'; }
+      for (i=0;i<3;i++){ x = 15+i*30; h += '<path d="M'+x+' 52Q'+(x-4)+' 30 '+x+' 12Q'+(x+4)+' 30 '+x+' 52Z" fill="#2f5a3c"/>'; }
+      for (i=0;i<5;i++) h += '<path d="M'+(8+i*20)+' 48V38h5v10z" fill="#d6cbb4"/><path d="M'+(8+i*20)+' 38l2.5 -4 2.5 4z" fill="#8a8f96"/>';
+      h += '<rect y="92" width="100" height="38" fill="#cfc6b2"/>';
+      for (i=0;i<9;i++) h += '<path d="M0 '+(96+i*4.4)+'H100" stroke="#bdb39c" stroke-width=".5"/>';
+    } else if (kind==='hipodrom'){
+      h += sky('#7fb1dc','#f1e6cf');
+      h += '<path d="M0 92V62Q50 50 100 62V92Z" fill="#b99f7c"/>';
+      for (i=0;i<12;i++) h += '<path d="M'+(2+i*8.4)+' 92V'+(66-Math.sin(i/11*Math.PI)*8)+'h4.6V92z" fill="#8f7658"/>';
+      h += '<path d="M46 86L48.4 22L50 16L51.6 22L54 86Z" fill="#c9836e"/><path d="M48.4 22L50 16L51.6 22Z" fill="#e3b84d"/><rect x="43" y="86" width="14" height="6" fill="#e9e2d2"/>';
+      h += '<path d="M47.6 40h4.8M47.4 50h5.2M47.2 60h5.6M47 70h6" stroke="#8f4e3e" stroke-width=".7"/>';
+      h += '<rect x="22" y="80" width="5" height="12" fill="#6f8f7a"/><rect x="74" y="72" width="6" height="20" fill="#a39686"/>';
+      h += '<rect y="92" width="100" height="38" fill="#d8c39a"/><path d="M0 104Q50 98 100 104M0 118Q50 110 100 118" stroke="#c4ad82" stroke-width=".8" fill="none"/>';
+    } else if (kind==='atolye'){
+      h += '<rect width="100" height="92" fill="#3b2a44"/>';
+      for (i=0;i<6;i++) for (x=0;x<6;x++) h += '<rect x="'+(x*18-(i%2)*9)+'" y="'+(i*15.4)+'" width="17" height="14.4" fill="#46334f"/>';
+      h += '<path d="M8 20H44" stroke="#7a5a35" stroke-width="1.6"/><path d="M12 20V70Q20 74 26 70V20Z" fill="#6b2d84"/><path d="M28 20V62Q34 66 40 62V20Z" fill="#8a3aa6"/><path d="M14 30h10M14 44h10M30 30h8M30 44h8" stroke="#e3b84d" stroke-width=".7"/>';
+      h += '<path d="M58 30H92V88H58Z" fill="none" stroke="#7a5a35" stroke-width="2"/>'; for (i=0;i<10;i++) h += '<path d="M'+(61+i*3.1)+' 31V87" stroke="#e9dfc6" stroke-width=".4"/>';
+      h += '<rect x="59" y="62" width="32" height="25" fill="#8a3aa6" opacity=".85"/><path d="M59 70h32M59 78h32" stroke="#e3b84d" stroke-width=".6"/>';
+      h += '<path d="M78 6h14v16h-14z" fill="#f1d27a"/><path d="M85 6v16M78 14h14" stroke="#3b2a44" stroke-width="1"/>';
+      h += '<rect y="92" width="100" height="38" fill="#6a5843"/>'; for (i=0;i<8;i++) h += '<path d="M0 '+(96+i*5)+'H100" stroke="#59493a" stroke-width=".6"/>';
+    } else if (kind==='forum'){
+      h += sky('#86b6dd','#f3ead8');
+      h += '<path d="M8 40L50 22L92 40Z" fill="#e9e1d2" stroke="#b9a48c" stroke-width=".8"/><rect x="8" y="40" width="84" height="5" fill="#d9cfbf"/>';
+      for (i=0;i<6;i++){ x = 12+i*14.6; h += '<rect x="'+x+'" y="45" width="6.4" height="43" fill="#efe8da" stroke="#b9a48c" stroke-width=".5"/><path d="M'+(x+2.1)+' 46V87M'+(x+4.3)+' 46V87" stroke="#cfc3b0" stroke-width=".5"/><rect x="'+(x-1)+'" y="44" width="8.4" height="2.4" fill="#d9cfbf"/>'; }
+      h += '<rect x="6" y="88" width="88" height="4" fill="#cfc3b0"/>';
+      h += '<rect y="92" width="100" height="38" fill="#d6cbbb"/>';
+      for (i=0;i<7;i++) for (x=0;x<6;x++) h += '<rect x="'+(x*20-(i%2)*10)+'" y="'+(92+i*5.6)+'" width="19" height="5" fill="none" stroke="#bfb3a1" stroke-width=".5"/>';
+    } else {
+      h += sky('#8fbde0','#f4ecd9');
+      for (i=0;i<4;i++){ x = 10+i*27; h += '<path d="M'+x+' 92V60" stroke="#6b4a2b" stroke-width="1.6"/><ellipse cx="'+x+'" cy="54" rx="11" ry="6.4" fill="#3d6b47"/>'; }
+      h += '<path d="M2 92V72h14v20zM24 92V78h10v14zM70 92V70h12v22z" fill="#b9886b" stroke="#8f6650" stroke-width=".6"/><path d="M5 72h8v-5h-8zM72 70h8v-6h-8z" fill="#a8775c"/>';
+      h += '<rect y="92" width="100" height="38" fill="#8f8a80"/><path d="M34 92H66L92 130H8Z" fill="#a9a398"/>';
+      for (i=0;i<6;i++) h += '<path d="M'+(36-i*5)+' '+(96+i*6)+'H'+(64+i*5)+'" stroke="#8f8a80" stroke-width=".7"/>';
+    }
+    return h + '<linearGradient id="gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".34"/></linearGradient>';
+  }
+
+  /* ---------- scene ---------- */
+  var svg = $('scene'), actors = null, playerEl = null, pos = [50,116], moving = null, busy = false, photoToken = null;
+  function mk(tag, attrs){ var el = document.createElementNS(NS, tag); for (var k in attrs) el.setAttribute(k, attrs[k]); return el; }
+  function depth(y){ return 0.8 + (Math.max(98, Math.min(124, y)) - 98)/26*0.2; }
+  function place(el, x, y, yy){ el.setAttribute('transform', 'translate('+x.toFixed(2)+' '+(yy===undefined?y:yy).toFixed(2)+') scale('+depth(y).toFixed(3)+')'); el.dataset.y = y; }
+  function isDone(n){ return n.clue ? has(n.clue) : !!st().done[n.id]; }
+  function markHTML(n){
+    var y = n.prop ? -27 : -64;
+    if (isDone(n)) return '<g class="mark"><circle cx="0" cy="'+y+'" r="3.4" fill="#d9a93a" stroke="#1a2233" stroke-width=".5"/><path d="M-1.7 '+y+'l1.2 1.3 2.2 -2.6" fill="none" stroke="#fff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></g>';
+    return '<g class="mark"><circle cx="0" cy="'+y+'" r="3.4" fill="#c8372d" stroke="#1a2233" stroke-width=".5"/><path d="M0 '+(y-2)+'v2.4M0 '+(y+1.5)+'v.1" stroke="#fff" stroke-width="1.1" stroke-linecap="round"/></g>';
+  }
+  function photoUrl(p){ return COMMONS+'Special:FilePath/'+encodeURIComponent(p.file)+'?width=900'; }
+  function buildScene(){
+    var r = R();
+    svg.innerHTML = backdrop(r.bg);
+    var photoLayer = mk('g', {}); svg.appendChild(photoLayer);
+    svg.appendChild(mk('rect', {x:0, y:84, width:100, height:46, fill:'url(#gd)', 'pointer-events':'none'}));
+    $('credit').hidden = true;
+    var token = photoToken = {};
+    if (r.photo){
+      var im = new Image();
+      im.onload = function(){
+        if (photoToken !== token) return;
+        var el = mk('image', {x:0, y:0, width:100, height:130, preserveAspectRatio:'xMidYMid slice'});
+        el.setAttribute('href', im.src); photoLayer.appendChild(el);
+        $('credit').textContent = 'Foto: '+r.photo.by+' · '+r.photo.lic+' · Wikimedia Commons'; $('credit').hidden = false;
+      };
+      im.src = photoUrl(r.photo);
+    }
+    actors = mk('g', {}); svg.appendChild(actors);
+    r.exits.forEach(function(x){
+      var ex = x.side==='left' ? 7 : 93;
+      var g = mk('g', {'class':'exit', 'data-exit':x.to, 'role':'button', 'aria-label':x.label+' yönüne git'});
+      g.innerHTML = '<rect x="-9" y="-16" width="18" height="26" fill="transparent"/><circle r="6.4" fill="rgba(15,18,26,.78)" stroke="#fff" stroke-width=".8"/><path d="'+(x.side==='left'?'M2 -3.4L-2 0L2 3.4':'M-2 -3.4L2 0L-2 3.4')+'" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><text y="-9.4" text-anchor="'+(x.side==='left'?'start':'end')+'" x="'+(x.side==='left'?-5.6:5.6)+'" font-size="3.6" font-weight="700" fill="#fff" stroke="rgba(15,18,26,.85)" stroke-width="1.6" paint-order="stroke" font-family="Alegreya Sans, sans-serif">'+x.label+'</text>';
+      g.setAttribute('transform', 'translate('+ex+' 106)'); g.dataset.y = 200;
+      actors.appendChild(g);
+    });
+    r.npcs.forEach(function(n){
+      var g = mk('g', {'class':'npc', 'data-npc':n.id, 'role':'button', 'aria-label':n.name});
+      g.innerHTML = (n.prop ? '<rect x="-13" y="-24" width="26" height="28" fill="transparent"/>'+prop(n.prop) : '<rect x="-12" y="-60" width="24" height="64" fill="transparent"/>'+figure(n.fig))+markHTML(n);
+      place(g, n.x, n.y); actors.appendChild(g);
+    });
+    playerEl = mk('g', {});
+    playerEl.innerHTML = figure({hat:'seyyah', robe:'#d8c9a3', arm:'#c2b28a', trim:'#8a6a2f', belt:'#6b4a2b'});
+    place(playerEl, pos[0], pos[1]); actors.appendChild(playerEl);
+    sortActors();
+    $('roomN').textContent = r.name;
+  }
+  function refreshMarks(){
+    R().npcs.forEach(function(n){
+      var g = actors.querySelector('[data-npc="'+n.id+'"]'), m = g.querySelector('.mark');
+      if (m) m.remove();
+      g.insertAdjacentHTML('beforeend', markHTML(n));
+    });
+  }
+  function sortActors(){
+    var kids = Array.prototype.slice.call(actors.children);
+    kids.sort(function(a,b){ return a.dataset.y - b.dataset.y; });
+    kids.forEach(function(k){ actors.appendChild(k); });
+  }
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+  function walkTo(x, y, done){
+    x = clamp(x, 8, 92); y = clamp(y, 100, 124);
+    var sx = pos[0], sy = pos[1], dist = Math.hypot(x-sx, y-sy), dur = Math.max(140, dist/42*1000), t0 = performance.now();
+    var token = moving = {};
+    function step(now){
+      if (moving !== token) return;
+      var k = Math.min(1, (now-t0)/dur);
+      pos = [sx+(x-sx)*k, sy+(y-sy)*k];
+      place(playerEl, pos[0], pos[1], pos[1] - Math.abs(Math.sin(k*dist*0.5))*1.1);
+      sortActors();
+      if (k < 1) requestAnimationFrame(step);
+      else { place(playerEl, pos[0], pos[1]); moving = null; if (done) done(); }
+    }
+    requestAnimationFrame(step);
+  }
+  function scenePoint(e){
+    var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    var m = svg.getScreenCTM(); if (!m) return [50,116];
+    var q = pt.matrixTransform(m.inverse()); return [q.x, q.y];
+  }
+  svg.addEventListener('click', function(e){
+    if (busy) return;
+    var t = e.target.closest ? e.target.closest('[data-npc],[data-exit]') : null;
+    if (t && t.hasAttribute('data-npc')){ approach(t.getAttribute('data-npc')); return; }
+    if (t){ leave(t.getAttribute('data-exit')); return; }
+    var q = scenePoint(e);
+    hint();
+    walkTo(q[0], q[1]);
+  });
+  function approach(id){
+    var n = findNpc(id); if (!n) return;
+    var side = pos[0] < n.x ? -15 : 15;
+    if (n.x + side < 9 || n.x + side > 91) side = -side;
+    busy = true;
+    walkTo(n.x + side, n.y + 2, function(){ talkTo(n); });
+  }
+  function leave(to){
+    var from = st().room, x = null;
+    R().exits.forEach(function(q){ if (q.to===to) x = q; });
+    if (!x) return;
+    busy = true;
+    walkTo(x.side==='left' ? 8 : 92, 112, function(){
+      st().room = to; save();
+      var back = null; R().exits.forEach(function(q){ if (q.to===from) back = q; });
+      pos = [back && back.side==='left' ? 16 : 84, 114];
+      if (!back) pos = [50,116];
+      busy = false; buildScene(); hint();
+    });
+  }
+
+  /* ---------- speech bubble ---------- */
+  var D = null, typer = null;
+  function placeBubble(x, headY){
+    var b = $('bub'), sr = $('stage').getBoundingClientRect(), m = svg.getScreenCTM();
+    var pt = svg.createSVGPoint(); pt.x = x; pt.y = headY;
+    var s = m ? pt.matrixTransform(m) : {x:sr.left+sr.width/2, y:sr.top+sr.height/2};
+    var w = sr.width*0.82, left = clamp(s.x - sr.left - w/2, 6, sr.width - w - 6);
+    b.style.left = left+'px';
+    b.style.bottom = Math.max(8, sr.bottom - s.y + 12)+'px';
+    b.style.setProperty('--tail', clamp(s.x - sr.left - left, 20, w-20)+'px');
+  }
+  function closeBubble(){ D = null; clearInterval(typer); $('bub').hidden = true; }
+  function talkTo(n){
+    var lines, give = null;
+    if (n.need && !has(n.need)) lines = [n.needLine];
+    else if (isDone(n)) lines = [n.again];
+    else { lines = n.lines; give = n; }
+    var self = !!n.prop;
+    D = {name: self ? 'Seyyah (sen)' : n.name, lines:lines, i:0, give:give,
+         x: self ? pos[0] : n.x, y: self ? pos[1] : n.y,
+         fig: self ? {hat:'seyyah', robe:'#d8c9a3', arm:'#c2b28a', trim:'#8a6a2f'} : n.fig};
+    $('av').innerHTML = '<svg viewBox="-9 -58 18 26" width="100%" height="100%" aria-hidden="true">'+figure(D.fig)+'</svg>';
+    $('bub').hidden = false;
+    showLine();
+  }
+  function showLine(){
+    var full = D.lines[D.i], i = 0, el = $('txt');
+    $('who').textContent = D.name;
+    el.textContent = '';
+    $('step').textContent = D.lines.length > 1 ? (D.i+1)+'/'+D.lines.length : '';
+    $('next').textContent = D.i < D.lines.length-1 ? 'Devam' : 'Tamam';
+    placeBubble(D.x, D.y - 62*depth(D.y));
+    clearInterval(typer);
+    D.done = false;
+    typer = setInterval(function(){
+      i += 2; el.textContent = full.slice(0, i);
+      if (i >= full.length){ clearInterval(typer); if (D) D.done = true; }
+    }, 22);
+  }
+  function nextLine(){
+    if (!D) return;
+    if (!D.done){ clearInterval(typer); $('txt').textContent = D.lines[D.i]; D.done = true; return; }
+    if (D.i < D.lines.length-1){ D.i++; showLine(); return; }
+    var n = D.give, got = null;
+    if (n){
+      if (n.clue){ st().clues.push(n.clue); got = E().clues[n.clue].t; } else st().done[n.id] = true;
+      save(); refreshMarks(); hud();
+    }
+    closeBubble(); busy = false; hint(got);
+  }
+  $('next').addEventListener('click', nextLine);
+  $('txt').addEventListener('click', function(){ if (D && !D.done) nextLine(); });
+
+  /* ---------- hud, notebook, solving ---------- */
+  function hint(got){
+    var h = $('hint');
+    h.classList.toggle('got', !!got);
+    if (got) h.textContent = 'Deftere eklendi: '+got+(st().clues.length >= total() ? '. Şimdi defteri aç ve vakayı çöz.' : '.');
+    else h.textContent = st().solved ? 'Vaka çözüldü. Dolaşabilir ya da menüden başka bir döneme geçebilirsin.'
+      : (st().clues.length >= total() ? 'Bütün ipuçları tamam. Defteri aç ve vakayı çöz.' : 'Zemine dokun: yürü. Kişiye dokun: konuş. Oka dokun: öteki odaya geç.');
+  }
+  function hud(){
+    $('clueN').textContent = st().clues.length+'/'+total();
+    $('bookBtn').classList.toggle('ready', st().clues.length >= total() && !st().solved);
+  }
+  function cite(s){ return s.replace(/\[(\d)\]/g, function(_, n){ return '<a href="'+SOURCES[n-1][1]+'" target="_blank" rel="noopener">['+n+']</a>'; }); }
+  function openBook(){
+    var h = '', e = E();
+    Object.keys(e.clues).forEach(function(id){
+      var c = e.clues[id];
+      h += has(id) ? '<div class="clue"><b>'+c.t+'</b><span>'+c.x+'</span><span class="fact">Tarih notu: '+cite(c.f)+'</span></div>'
+                   : '<div class="clue empty">Henüz bulunmadı. Biriyle konuşman gerekiyor.</div>';
+    });
+    $('clues').innerHTML = h;
+    var ready = st().clues.length >= total();
+    $('solveBtn').disabled = !ready || st().solved;
+    $('solveBtn').textContent = st().solved ? 'Vaka çözüldü' : (ready ? 'Vakayı çöz' : 'Önce bütün ipuçlarını topla');
+    $('book').hidden = false;
+  }
+  function openSolve(){
+    var e = E();
+    $('book').hidden = true;
+    $('solveT').textContent = e.q; $('solveW').textContent = '';
+    $('opts').innerHTML = e.opts.map(function(o, i){ return '<button type="button" class="opt" data-i="'+i+'">'+o+'</button>'; }).join('');
+    $('solve').hidden = false;
+  }
+  $('opts').addEventListener('click', function(ev){
+    var b = ev.target.closest('.opt'); if (!b) return;
+    if (+b.dataset.i === E().ans){ st().solved = true; save(); $('solve').hidden = true; hud(); hint(); showEnd(); }
+    else { b.classList.add('bad'); b.disabled = true; $('solveW').textContent = 'Bu, ipuçlarıyla uyuşmuyor. Defterine tekrar bak.'; }
+  });
+  function nextEra(){ for (var i=0;i<ORDER.length;i++){ if (!P.eras[ORDER[i]].solved) return ORDER[i]; } return null; }
+  function showEnd(){
+    var e = E(), nx = nextEra();
+    $('endT').textContent = e.title; $('endX').textContent = e.end;
+    $('endR').innerHTML = cite(e.real); $('endF').textContent = e.fic;
+    $('endGo').textContent = nx ? 'Sıradaki dönem: '+ERAS[nx].name : 'Dönemleri ve kaynakları gör';
+    $('endGo').dataset.to = nx || '';
+    $('end').hidden = false;
+  }
+  $('endGo').addEventListener('click', function(){ $('end').hidden = true; var to = this.dataset.to; if (to) loadEra(to); else openMenu(); });
+  $('endStay').addEventListener('click', function(){ $('end').hidden = true; });
+
+  /* ---------- menu: eras, sources, photo credits ---------- */
+  function openMenu(){
+    $('eras').innerHTML = ORDER.map(function(id){
+      var e = ERAS[id], s = P.eras[id], n = Object.keys(e.clues).length;
+      var status = s.solved ? 'Çözüldü' : (s.clues.length ? s.clues.length+'/'+n+' ipucu' : 'Başlanmadı');
+      return '<button type="button" class="era" data-id="'+id+'" aria-pressed="'+(id===P.era)+'"><span><strong>'+e.name+'</strong><small>'+e.title+' · '+status+'</small></span><span class="sw">'+e.sw.map(function(c){ return '<i style="background:'+c+'"></i>'; }).join('')+'</span></button>';
+    }).join('');
+    $('srcs').innerHTML = SOURCES.map(function(s){ return '<li><a href="'+s[1]+'" target="_blank" rel="noopener">'+s[0]+'</a></li>'; }).join('');
+    var ph = '';
+    ORDER.forEach(function(id){ var rs = ERAS[id].rooms, k; for (k in rs){ var p = rs[k].photo; if (p) ph += '<li>'+rs[k].name+': <a href="'+COMMONS+'File:'+encodeURIComponent(p.file)+'" target="_blank" rel="noopener">'+p.by+'</a>, '+p.lic+'</li>'; } });
+    $('photos').innerHTML = ph;
+    $('menu').hidden = false;
+  }
+  $('eras').addEventListener('click', function(ev){ var b = ev.target.closest('.era'); if (b){ $('menu').hidden = true; loadEra(b.dataset.id); } });
+  $('restart').addEventListener('click', function(){ P.eras[P.era] = blank(); save(); $('menu').hidden = true; loadEra(P.era); });
+
+  function loadEra(id){
+    P.era = id;
+    moving = null; busy = false; closeBubble();
+    var e = E();
+    if (!st().room || !e.rooms[st().room]) st().room = e.first;
+    save();
+    if (id==='osmanli') delete document.body.dataset.era; else document.body.dataset.era = id;
+    $('place').textContent = e.place; $('caseT').textContent = e.title;
+    pos = [50,116];
+    buildScene(); hud(); hint();
+    if (!st().seen){
+      $('introP').textContent = e.place; $('introT').textContent = e.title; $('introX').textContent = e.intro;
+      $('intro').hidden = false;
+    }
+  }
+  $('introGo').addEventListener('click', function(){ st().seen = true; save(); $('intro').hidden = true; });
+  $('bookBtn').addEventListener('click', openBook);
+  $('bookX').addEventListener('click', function(){ $('book').hidden = true; });
+  $('solveBtn').addEventListener('click', openSolve);
+  $('solveX').addEventListener('click', function(){ $('solve').hidden = true; });
+  $('menuBtn').addEventListener('click', openMenu);
+  $('menuX').addEventListener('click', function(){ $('menu').hidden = true; });
+  window.addEventListener('resize', function(){ if (D) placeBubble(D.x, D.y - 62*depth(D.y)); });
+
+  loadEra(P.era);
+})();
+</script>
+
+</body>
+</html>
