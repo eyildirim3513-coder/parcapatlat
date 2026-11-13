@@ -100,6 +100,7 @@ a{color:var(--accent)}
 .clue .fact{font-size:.88rem;color:var(--ink2);border-top:1px dashed var(--line);padding-top:6px;margin-top:2px}
 .clue.empty{border-style:dashed;color:var(--ink2)}
 .opt{text-align:left;border:2px solid var(--line);background:var(--bg);border-radius:13px;padding:11px 13px;font-weight:700}
+.opt[disabled]{opacity:.5;cursor:not-allowed}
 .opt.bad{border-color:var(--accent);opacity:.55;text-decoration:line-through}
 .note{border-radius:13px;padding:10px 12px;background:var(--bg);font-size:.93rem}
 .note b{display:block;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:2px}
@@ -174,7 +175,7 @@ a{color:var(--accent)}
 
 <div class="ov" id="end" hidden role="dialog" aria-modal="true" aria-labelledby="endT">
   <div class="card">
-    <span class="eye">Vaka çözüldü</span>
+    <span class="eye">Bölüm tamamlandı</span>
     <h2 id="endT"></h2>
     <p id="endX"></p>
     <div class="note"><b>Gerçek</b><span id="endR"></span></div>
@@ -188,7 +189,9 @@ a{color:var(--accent)}
   <div class="card">
     <div class="head"><h2 id="menuT">Dönemler</h2><button class="x" id="menuX" type="button" aria-label="Kapat">✕</button></div>
     <div id="eras" style="display:flex;flex-direction:column;gap:8px"></div>
-    <button class="btn" id="restart" type="button">Bu vakayı baştan başlat</button>
+    <h3 id="chT">Bölümler</h3>
+    <div id="chs" style="display:flex;flex-direction:column;gap:6px"></div>
+    <button class="btn" id="restart" type="button">Bu bölümü baştan başlat</button>
     <h3>Kaynaklar</h3>
     <ol class="src" id="srcs"></ol>
     <h3>Fotoğraflar</h3>
@@ -200,56 +203,257 @@ a{color:var(--accent)}
 <script>
 (function(){
   'use strict';
-  var KEY = 'devri-alem-v2';
+  var KEY = 'devri-alem-v3';
   var ORDER = ['osmanli','bizans','roma'];
   var COMMONS = 'https://commons.wikimedia.org/wiki/';
+  /* figures used more than once */
+  var F = {
+    mehmed:{hat:'kavuk', robe:'#a3271f', arm:'#6b4a2b', trim:'#c9a227', belt:'#c9a227', beard:'must'},
+    halil:{hat:'kavuk', robe:'#2e5a44', arm:'#244836', trim:'#c9a227', belt:'#8a6a2f', beard:'full', hair:'#d9d5cc'},
+    zaganos:{hat:'kavuk', robe:'#2c4f8a', arm:'#223f70', trim:'#c8372d', belt:'#c9a227', beard:'full'},
+    aksemseddin:{hat:'kavuk', robe:'#e9e4d6', arm:'#d6cfbd', trim:'#2e5a44', belt:'#8a6a2f', beard:'full', hair:'#e6e2da'},
+    yeniceri:{hat:'bork', robe:'#b3261e', arm:'#8f1d18', trim:'#c9a227', belt:'#2e3b55', beard:'must', item:'spear'},
+    katip:{hat:'kavuk', robe:'#2e6b4f', arm:'#245540', trim:'#c8372d', belt:'#c9a227', beard:'full', item:'scroll'}
+  };
   var ERAS = {
-    osmanli:{
-      name:'Osmanlı', place:'Topkapı Sarayı · 16. yüzyıl', title:'Kayıp Ferman', sw:['#e9f0f3','#1d4e89','#c8372d'],
-      intro:'Divan toplantısı az önce bitti. Tuğralı bir ferman, mürekkebi kurusun diye bırakıldığı rahleden kayboldu. Ulak yola çıkmadan fermanı bul.',
-      first:'a',
-      rooms:{
-        a:{name:'Divan kapısı', bg:'divan', photo:{file:'4146 Istanbul - Topkapi - Divano.jpg', by:'Giovanni Dall’Orto', lic:'atıf şartıyla serbest'},
-          exits:[{side:'right', to:'b', label:'İkinci avlu'}],
-          npcs:[
-            {id:'yeniceri', name:'Yeniçeri nöbetçi', x:22, y:108, fig:{hat:'bork', robe:'#b3261e', arm:'#8f1d18', trim:'#c9a227', belt:'#2e3b55', beard:'must', item:'spear'},
+    osmanli:{ name:'Osmanlı', sw:['#e9f0f3','#1d4e89','#c8372d'], chapters:[
+      { title:'Genç Padişah', place:'Edirne Sarayı · 1451',
+        intro:'1451. II. Murad öldü, oğlu Mehmed tahta çıktı. Henüz yirmisine varmadı. Surlarının ardındaki Konstantinopolis, Osmanlı topraklarının ortasında tek başına duruyor. Sarayda herkes aynı şeyi soruyor: genç padişah ne yapacak?',
+        first:'a',
+        rooms:{
+          a:{name:'Taht odası', bg:'divan', light:'ic', lname:'kış sabahı, pencere ışığı', exits:[{side:'right', to:'b', label:'Saray avlusu'}], npcs:[
+            {id:'mehmed', name:'II. Mehmed', x:52, y:106, fig:F.mehmed,
+              lines:['Yaklaş seyyah. Bu saraya çok elçi geldi, hepsi aynı şeyi söyledi: o şehir alınmaz.','Babam Murad Han 1422’de kuşattı, alamadı. Surlar sağlamdı, şehre yardım geldi.','Ben aynı yoldan gitmeyeceğim. Önce şehrin soluk borusunu keseceğim.','Paşalarımı dinle. Sonra bana ilk işimin ne olacağını söyle.'],
+              clue:'f1', again:'Paşalarımı dinledin mi? Defterine bak, sonra kararımı söyle.'},
+            {id:'halil', name:'Çandarlı Halil Paşa', x:20, y:112, fig:F.halil,
+              lines:['Padişahım gençtir, ben ihtiyarım. Varna’yı da Kosova’yı da gördüm.','Bu şehre dokunursak Frenkler yeniden birleşir, üstümüze bir Haçlı ordusu daha gelir.','Benim sözüm bellidir: acele etmeyelim.'],
+              clue:'f2', again:'Sözüm sözdür: bu iş başımıza Haçlıları toplar.'}
+          ]},
+          b:{name:'Saray avlusu', bg:'avlu', light:'sabah', lname:'kış sabahı', exits:[{side:'left', to:'a', label:'Taht odası'}], npcs:[
+            {id:'zaganos', name:'Zağanos Paşa', x:64, y:108, fig:F.zaganos,
+              need:'f1', needLine:'Önce padişahımızı dinle, sonra gel.',
+              lines:['Halil Paşa korkusunu anlattı, değil mi? Ben başka düşünürüm.','Şehre yardım Karadeniz’den, Boğaz’dan gelir. Karşı kıyıda Yıldırım Bayezid’in yaptırdığı hisar var ama tek başına yetmiyor.','Boğaz’ın en dar yerine, onun tam karşısına ikinci bir hisar dikilirse o sudan kuş geçmez.'],
+              clue:'f3', again:'İki hisar karşılıklı durursa Boğaz kapanır. Padişaha bunu söyle.'},
+            {id:'katip1', name:'Saray kâtibi', x:28, y:114, fig:F.katip,
+              lines:['Padişahımız geceleri harita başında sabahlıyor.','Şehrin surlarını, kapılarını, limanını ezbere çiziyor. Aklı hep orada.'],
+              again:'Haritalar hâlâ masanın üstünde.'}
+          ]}
+        },
+        clues:{
+          f1:{t:'Eski kuşatma', x:'II. Murad 1422’de şehri kuşattı ama alamadı. Mehmed önce şehre gelen yardımı kesmek istiyor.', f:'II. Mehmed 1451’de Osmanlı tahtına geçti. Babası II. Murad’ın 1422’deki İstanbul kuşatması başarısız olmuştu. [8]'},
+          f2:{t:'Vezirin korkusu', x:'Veziriazam Çandarlı Halil Paşa kuşatmaya karşı. Yeni bir Haçlı ittifakından korkuyor.', f:'Çandarlı Halil Paşa, Varna ve İkinci Kosova savaşlarının tehlikelerini hatırladığı için kuşatmanın yeni bir Haçlı ittifakına yol açmasından endişe ediyordu. [10]'},
+          f3:{t:'Boğaz’ın iki yakası', x:'Anadolu yakasında Yıldırım Bayezid’in hisarı var. Karşısına ikinci bir hisar yapılırsa Boğaz kapanır.', f:'Anadolu Hisarı’nı I. Bayezid 1393-1394’te yaptırmıştı. [11]'}
+        },
+        q:'Mehmed’in ilk büyük hamlesi ne oldu?', opts:['Hemen surlara saldırmak','Boğaz’ın en dar yerine bir hisar yaptırmak','Bizans’la uzun bir barış imzalamak','Donanmayı Akdeniz’e göndermek'], ans:1,
+        end:'Mehmed, Boğaz’ın Rumeli yakasına bir hisar yaptırmaya karar verdi. İnşaat 1452 baharında başlayacak.',
+        real:'II. Mehmed 1451’de tahta çıktı. Çandarlı Halil Paşa kuşatmaya karşıydı, Zağanos Paşa ise destekliyordu. Mehmed, Karadeniz’den gelecek yardımı kesmek için Boğaz’a bir hisar yaptırdı. [8][10][11]',
+        fic:'Seyyah, saray kâtibi ve konuşmaların sözleri kurgudur.' },
+
+      { title:'Boğazkesen', place:'Boğaziçi · 1452',
+        intro:'15 Nisan 1452. Boğaz’ın en dar yerinde binlerce işçi taş taşıyor. Hisarın neden tam bu noktaya yapıldığını ve işin nasıl bölüşüldüğünü öğren.',
+        first:'a',
+        rooms:{
+          a:{name:'Hisar şantiyesi', bg:'hisar', light:'ogle', lname:'bahar öğlesi', exits:[{side:'right', to:'b', label:'Kıyı'}], npcs:[
+            {id:'usta', name:'Taşçı ustabaşı', x:26, y:110, fig:{hat:'band', robe:'#8a8172', arm:'#6f685c', trim:'#5a3b22', belt:'#5a3b22', beard:'must'},
+              lines:['Kolay gelsin de, taş ağır! 15 Nisan’da temel attık, durmadan çalışıyoruz.','Padişah işi paşalarına bölüştürdü. Her paşa kendi kulesinden sorumlu.','Sahildeki büyük kule Halil Paşa’nın, güneydeki Zağanos Paşa’nın, kuzeydeki Sarıca Paşa’nın.'],
+              clue:'h1', again:'Üç kule, üç paşa. Hangisi geç kalırsa padişaha o hesap verir.'},
+            {id:'zaganos2', name:'Zağanos Paşa', x:70, y:114, fig:F.zaganos,
+              lines:['Güney kulesi benimdir. Halil Paşa bile taş taşıtıyor, gördün mü?','Kuşatmayı istemeyen de bu hisarda çalışıyor. Padişahın emri böyledir.'],
+              again:'Kulem yükseliyor. Sen kıyıya in, suyu gör.'}
+          ]},
+          b:{name:'Kıyı', bg:'kiyi', light:'ogle', lname:'bahar öğlesi', exits:[{side:'left', to:'a', label:'Şantiye'}], npcs:[
+            {id:'kayikci', name:'Kayıkçı', x:30, y:112, fig:{hat:'band', robe:'#3f6f8a', arm:'#32596f', trim:'#f1ebe0', belt:'#f1ebe0'},
+              lines:['Ben bu suyu yirmi yıldır geçerim. Boğaz’ın en dar yeri burasıdır.','Tam karşıda Anadolu Hisarı görünür, bak.','İki hisar karşılıklı top atarsa aradan gemi geçemez.'],
+              clue:'h2', again:'En dar yer burası. Karşısı Anadolu Hisarı.'},
+            {id:'topcu', name:'Hisar topçusu', x:70, y:108, fig:{hat:'takke', robe:'#5a4636', arm:'#48382b', trim:'#b3261e', belt:'#b3261e', beard:'full'},
+              need:'h2', needLine:'Önce şu suya bir bak, kayıkçıyla konuş. Sonra anlatırım.',
+              lines:['Hisarın adını duydun mu? Boğazkesen.','Buradan izinsiz geçen gemiyi durdururuz. Karadeniz’den şehre ne buğday gider ne asker.'],
+              clue:'h3', again:'Adı üstünde: Boğazkesen.'}
+          ]}
+        },
+        clues:{
+          h1:{t:'Paşaların kuleleri', x:'Her kule bir paşanın sorumluluğunda: Halil Paşa, Zağanos Paşa ve Sarıca Paşa.', f:'Rumeli Hisarı’nın inşaatı 15 Nisan 1452’de başladı. Üç büyük kulesi Çandarlı Halil, Zağanos ve Sarıca paşaların gözetiminde yapıldı. [11]'},
+          h2:{t:'En dar yer', x:'Hisar Boğaz’ın en dar yerinde, Anadolu Hisarı’nın tam karşısında.', f:'Rumeli Hisarı, Boğaz’ın yaklaşık 660 metreye kadar daraldığı noktada, Anadolu Hisarı’nın karşısına yapıldı. [11]'},
+          h3:{t:'Boğazkesen', x:'Hisarın ilk adı Boğazkesen. Amacı Karadeniz’den şehre giden yardımı kesmek.', f:'Hisarın ilk adı Boğazkesen’di. Amaç Boğaz’daki gemi trafiğini denetlemek ve şehre deniz yoluyla gelecek yardımı kesmekti. [11]'}
+        },
+        q:'Hisar neden tam bu noktaya yapıldı?', opts:['Taş ocağına yakın olduğu için','Boğaz’ın en dar yeri ve Anadolu Hisarı’nın karşısı olduğu için','Şehrin surlarını buradan topla dövmek için','Padişahın yazlık sarayı olacağı için'], ans:1,
+        end:'Boğazkesen tamamlandı. Artık Karadeniz’den şehre giden yol padişahın toplarının önünden geçiyor.',
+        real:'Hisar 1452’de, Boğaz’ın en dar yerinde ve Anadolu Hisarı’nın karşısında yapıldı. Sonradan Rumeli Hisarı adını aldı. [11]',
+        fic:'Ustabaşı, kayıkçı ve topçu kurgudur.' },
+
+      { title:'Urban’ın Topu', place:'Edirne · 1452-1453',
+        intro:'Surlar yüzyıllardır ayakta. Onları yıkacak bir silah gerek. Edirne’de Macar bir usta, kimsenin görmediği büyüklükte bir top döküyor. Ustanın kim olduğunu ve topun gücünü öğren.',
+        first:'a',
+        rooms:{
+          a:{name:'Dökümhane', bg:'dokum', light:'ates', exits:[{side:'right', to:'b', label:'Edirne yolu'}], npcs:[
+            {id:'urban', name:'Urban Usta', x:30, y:110, fig:{hat:'bare', robe:'#5a4636', arm:'#48382b', trim:'#2a211c', belt:'#2a211c', beard:'full', hair:'#7a5a35'},
+              lines:['Adım Urban. Macar’ım, top dökerim.','Önce Konstantinopolis’e gittim. İmparator Konstantinos istediğim parayı veremedi.','Sonra bu saraya geldim. Sultan Mehmed istediğimin dört katını verdi.','Surları yıkacak bir top istiyordu. Döktüm.'],
+              clue:'u1', again:'İmparator ödeyemedi, sultan ödedi. İş bu kadar basit.'},
+            {id:'cirak', name:'Dökümcü çırağı', x:68, y:114, fig:{hat:'takke', robe:'#7a5a35', arm:'#634828', trim:'#2a211c', belt:'#2a211c'},
+              lines:['Ustanın en büyük topunu gördün mü? Boyu dokuz metre!','Ağzı bir metre genişliğinde. Beş yüz kiloluk taş gülle atıyor.'],
+              clue:'u2', again:'Dokuz metre! İçine girip yürürsün.'}
+          ]},
+          b:{name:'Edirne yolu', bg:'yol', light:'ikindi', exits:[{side:'left', to:'a', label:'Dökümhane'}], npcs:[
+            {id:'arabaci2', name:'Öküz sürücüsü', x:28, y:112, fig:{hat:'band', robe:'#8a6a2f', arm:'#6f5525', trim:'#3a1f1a', belt:'#3a1f1a', beard:'must'},
+              need:'u2', needLine:'Bu topun ne olduğunu biliyor musun? Önce dökümhanedeki çırağa sor.',
+              lines:['Bu canavarı öküzlerle çekiyoruz. Yol bitmek bilmiyor.','Gücü çok ama nazlıdır: günde ancak yedi kez ateşlenir.'],
+              clue:'u3', again:'Günde yedi atış. Fazlası olmaz.'},
+            {id:'top', name:'Büyük top', x:66, y:118, prop:'top',
+              lines:['Tunç namlu soğuk ve dev gibi. Ağzına bir insan rahatça sığar.'], again:'Dev bir tunç namlu.'}
+          ]}
+        },
+        clues:{
+          u1:{t:'Ustanın yolu', x:'Urban önce Bizans imparatoruna gitti, para alamadı. Mehmed istediğinin dört katını verdi.', f:'Macar top ustası Urban hizmetini önce Bizans’a önerdi; imparator ücreti ödeyemeyince II. Mehmed’e geçti. [9]'},
+          u2:{t:'Topun ölçüsü', x:'En büyük top 9 metre uzunluğunda, 500 kiloluk gülle atıyor.', f:'En büyük topun uzunluğu 9 metre, ağız genişliği 1 metreydi; yaklaşık 1,5 kilometreye 500 kiloluk gülle atabiliyordu. [9]'},
+          u3:{t:'Günde yedi atış', x:'Büyük top günde yalnızca yedi kez ateşlenebiliyor.', f:'Büyük top günde yalnızca yedi atış yapabiliyordu. [9]'}
+        },
+        q:'Büyük topun zayıf yanı neydi?', opts:['Gülleyi surlara kadar atamaması','Günde yalnızca yedi kez ateşlenebilmesi','Yalnızca gemiden atılabilmesi','Ahşaptan yapılmış olması'], ans:1,
+        end:'Toplar Edirne’den yola çıktı. Nisan başında surların önünde olacaklar.',
+        real:'Urban gerçek bir kişidir. Topun ölçüleri ve günde yedi atış sınırı kaynaklarda geçer. [8][9]',
+        fic:'Çırak ve öküz sürücüsü kurgudur.' },
+
+      { title:'Zincir', place:'Konstantinopolis önleri · Nisan 1453',
+        intro:'6 Nisan 1453. Kuşatma başladı. Toplar kara surlarını dövüyor. Haliç’in ağzı ise kalın bir zincirle kapalı, donanma içeri giremiyor. Padişahın bu zinciri nasıl aştığını bul.',
+        first:'a',
+        rooms:{
+          a:{name:'Kara surlarının önü', bg:'surlar', light:'ikindi', exits:[{side:'right', to:'b', label:'Haliç ağzı'}], npcs:[
+            {id:'topcubasi', name:'Topçubaşı', x:24, y:110, fig:{hat:'takke', robe:'#5a4636', arm:'#48382b', trim:'#c9a227', belt:'#b3261e', beard:'full'},
+              lines:['2 Nisan’da surların önüne vardık. 5’inde padişah teslim olun diye haber gönderdi, cevap gelmedi.','6 Nisan’da topları ateşledik. Biz yıkıyoruz, onlar onarıyor.'],
+              clue:'z1', again:'6 Nisan’dan beri toplar susmadı.'},
+            {id:'azap', name:'Azap askeri', x:70, y:114, fig:{hat:'band', robe:'#6f7f5a', arm:'#596647', trim:'#3a1f1a', belt:'#3a1f1a', beard:'must', item:'spear'},
+              lines:['İçeride kaç kişi var bilir misin? Sekiz bin kadar diyorlar. Biz kat kat fazlayız.','Ama sur surdur. Sayı yetmez, bir açık kapı lazım.'],
+              clue:'z2', again:'Sayımız çok ama sur yüksek.'}
+          ]},
+          b:{name:'Haliç ağzı', bg:'halic', light:'aksam', exits:[{side:'left', to:'a', label:'Kara surları'}], npcs:[
+            {id:'kaptan', name:'Kaptan', x:30, y:110, fig:{hat:'band', robe:'#2c4f8a', arm:'#223f70', trim:'#f1ebe0', belt:'#c8372d', beard:'full'},
+              lines:['Şu zinciri görüyor musun? Haliç’in ağzını bir uçtan bir uca kapatıyor.','Gemilerimiz içeri giremiyor. Giremezsek Haliç tarafındaki surlara dokunamayız.'],
+              clue:'z3', again:'Zincir duruyor. Denizden yol yok.'},
+            {id:'marangoz', name:'Marangoz', x:70, y:114, fig:{hat:'takke', robe:'#8a6a2f', arm:'#6f5525', trim:'#5a3b22', belt:'#5a3b22'},
+              need:'z3', needLine:'Elim işte. Önce kaptana sor, derdimiz neymiş öğren.',
+              lines:['Padişah bizden kızak, kütük ve yağ istedi. Çok yağ.','Tepenin ardına bir yol döşüyoruz. Gemiler denizden değil, karadan gidecekmiş!'],
+              clue:'z4', again:'Kütükleri yağladık. Gerisi öküzlerin işi.'}
+          ]}
+        },
+        clues:{
+          z1:{t:'Kuşatma başlıyor', x:'Ordu 2 Nisan’da geldi, 6 Nisan’da toplar ateşlendi.', f:'Osmanlı ordusu 2 Nisan 1453’te surların önünde toplandı; teslim çağrısı cevapsız kalınca saldırı 6 Nisan’da başladı. [9]'},
+          z2:{t:'Sayılar', x:'Savunanlar yaklaşık sekiz bin kişi. Kuşatanlar çok daha kalabalık.', f:'Şehri XI. Konstantinos komutasında yaklaşık 8.000 kişi savunuyordu. Modern tarihçiler Osmanlı ordusunu 60.000-80.000 olarak tahmin eder. [8][9]'},
+          z3:{t:'Haliç kapalı', x:'Haliç’in ağzı zincirle kapalı. Donanma içeri giremiyor.', f:'Haliç’in girişi bir zincirle kapatılmıştı. [8]'},
+          z4:{t:'Kütük ve yağ', x:'Padişah tepenin ardına kütüklü bir yol döşetiyor. Gemiler karadan yürütülecek.', f:'II. Mehmed gemileri Boğaz’dan kütükler üzerinde karadan çektirip Haliç’e indirdi. Kaynaklara göre yaklaşık 70 gemi, öküzlerin çektiği arabalarla taşındı. [8][9]'}
+        },
+        q:'Osmanlı donanması Haliç’e nasıl girdi?', opts:['Zinciri toplarla kırarak','Gemileri karadan yürüterek','Gece zincirin altından geçerek','Cenevizlilerden izin alarak'], ans:1,
+        end:'Bir sabah şehir uyandığında Osmanlı gemileri Haliç’teydi. Savunanlar artık bir suru daha korumak zorunda.',
+        real:'Kuşatma 6 Nisan 1453’te başladı. Zincir, gemilerin karadan yürütülmesi ve asker sayıları kaynaklarda geçer. [8][9]',
+        fic:'Topçubaşı, azap askeri, kaptan ve marangoz kurgudur.' },
+
+      { title:'Otağda Karar', place:'Padişah otağı · Mayıs 1453',
+        intro:'Kuşatma yedinci haftasına giriyor. Surlar hâlâ ayakta, ordu yorgun. Otağda paşalar ikiye bölündü: biri kuşatmayı kaldıralım diyor, öteki son bir hücum istiyor. Padişahın kimi dinlediğini öğren.',
+        first:'a',
+        rooms:{
+          a:{name:'Padişah otağı', bg:'otag', light:'kandil', exits:[{side:'right', to:'b', label:'Ordugâh'}], npcs:[
+            {id:'halil5', name:'Çandarlı Halil Paşa', x:22, y:110, fig:F.halil,
+              lines:['Yedi haftadır buradayız padişahım. Sur hâlâ duruyor.','Uzarsa Frenkler yardıma gelir. Şartlarımızı bildirip kuşatmayı kaldıralım.'],
+              clue:'k1', again:'Ben sözümü söyledim. Karar padişahımızındır.'},
+            {id:'mehmed5', name:'II. Mehmed', x:60, y:108, fig:F.mehmed,
+              need:'k3', needLine:'Paşalarımı ve hocalarımı dinlemeden bana gelme.',
+              lines:['Hepsini dinledin. Ben de dinledim.','Halil Paşa’nın sözü ağırdır. Ama bu kez onun dediği olmayacak.','Defterini aç seyyah, kararımı sen söyle.'],
+              again:'Kararım belli. Defterini aç.'}
+          ]},
+          b:{name:'Ordugâh', bg:'surlar', light:'gece', exits:[{side:'left', to:'a', label:'Otağ'}], npcs:[
+            {id:'zaganos5', name:'Zağanos Paşa', x:30, y:110, fig:F.zaganos,
+              lines:['Geri dönmek olmaz! Beklenen yardım bugün yok, yarın da yetişemez.','Asker son bir hücum bekliyor. Karadan ve denizden, aynı anda.'],
+              clue:'k2', again:'Karadan ve denizden, aynı anda. Başka yolu yok.'},
+            {id:'aksemseddin', name:'Akşemseddin', x:70, y:114, fig:F.aksemseddin,
+              need:'k1', needLine:'Önce otağda Halil Paşa’yı dinle evladım. İki tarafı da bil.',
+              lines:['Padişahımıza söyledim: bu iş yarım bırakılmaz.','Molla Gürânî de benim gibi düşünür. Zağanos Paşa’nın sözü doğrudur.'],
+              clue:'k3', again:'Sözüm aynıdır evladım: yarım bırakılmaz.'}
+          ]}
+        },
+        clues:{
+          k1:{t:'Halil Paşa’nın sözü', x:'Halil Paşa kuşatmanın kaldırılmasını öneriyor.', f:'Çandarlı Halil Paşa kuşatma sırasında zaman zaman belirli şartlarla kuşatmanın kaldırılmasını önerdi. [10]'},
+          k2:{t:'Zağanos Paşa’nın sözü', x:'Zağanos Paşa karadan ve denizden son bir genel hücum istiyor.', f:'29 Mayıs’ta saldırı kara ve deniz tarafından aynı anda yapıldı. [8]'},
+          k3:{t:'Hocaların görüşü', x:'Akşemseddin ve Molla Gürânî, Zağanos Paşa’yı destekliyor.', f:'II. Mehmed, Zağanos Paşa’nın önerilerini destekleyen Molla Gürânî ve Akşemseddin’in görüşlerine uyarak kuşatmayı sürdürdü. [10]'}
+        },
+        q:'Padişah hangi kararı verdi?', opts:['Kuşatmayı kaldırıp Edirne’ye döndü','Bir yıl beklemeye karar verdi','Zağanos Paşa’yı dinleyip genel hücum emri verdi','Şehri parayla satın almayı önerdi'], ans:2,
+        end:'Karar çıktı: genel hücum. Tellallar ordugâhta dolaşıyor, herkes şafağı bekliyor.',
+        real:'Halil Paşa ile Zağanos Paşa arasındaki anlaşmazlık ve padişahın Zağanos’tan yana karar vermesi kaynaklarda geçer. Halil Paşa fetihten bir gün sonra, 30 Mayıs 1453’te görevden alındı. [10]',
+        fic:'Konuşmaların sözleri kurgudur.' },
+
+      { title:'29 Mayıs', place:'Konstantinopolis · 29 Mayıs 1453',
+        intro:'29 Mayıs 1453, Salı. Hücum şafakta başlıyor. Kara surları şehrin batısında; güneş birazdan surların ardından doğacak. Hücumun nasıl sıralandığını ve şehre nereden girildiğini öğren.',
+        first:'a',
+        rooms:{
+          a:{name:'Kara surları', bg:'surlar', light:'safak', exits:[{side:'right', to:'b', label:'Ayasofya'}], npcs:[
+            {id:'cavus', name:'Çavuş', x:26, y:110, fig:{hat:'takke', robe:'#2e5a44', arm:'#244836', trim:'#c9a227', belt:'#b3261e', beard:'full'},
+              lines:['Hücum üç dalgadır, sırayı iyi belle.','Önce en hafif birlikler yürüdü. Surdakileri yordular, geri çekildiler.','Ardından daha iyi silahlı birlikler saldırdı. Onlar da geçemedi.','En sona yeniçeriler kaldı.'],
+              clue:'s1', again:'Hafifler, sonra iyi silahlılar, en son yeniçeriler.'},
+            {id:'yeniceri6', name:'Yeniçeri', x:70, y:114, fig:F.yeniceri,
+              need:'s1', needLine:'Soluğum kesildi. Önce çavuşa sor, sırayı o bilir.',
+              lines:['Surda küçük bir kapı vardı, Kerkoporta derler. Oradan girdik.','Surun tepesine çıkıp sancağı diktik. Sonra büyük kapıya yürüdük.','İmparator kapının yanında, askerinin arasında dövüşürken düşmüş derler.'],
+              clue:'s2', again:'Küçük kapıdan girdik, sancağı diktik.'}
+          ]},
+          b:{name:'Ayasofya önü', bg:'ayasofya', light:'ikindi', lname:'öğleden sonra', exits:[{side:'left', to:'a', label:'Kara surları'}], npcs:[
+            {id:'katip6', name:'Ordu kâtibi', x:28, y:112, fig:F.katip,
+              lines:['Padişahımız şehre öğleden sonra girdi. Beyaz bir atın üstündeydi.','Doğruca Ayasofya’ya geldi. Yağmayı durdurdu.','Bugünden sonra burası camidir, şehir de payitaht.'],
+              clue:'s3', again:'Öğleden sonra girdi, doğruca buraya geldi.'},
+            {id:'mehmed6', name:'II. Mehmed', x:66, y:108, fig:F.mehmed,
+              need:'s3', needLine:'Önce kâtibimden olanları dinle.',
+              lines:['Daha yirmilerimin başındayım seyyah. Babamın alamadığı şehirdeyim.','Bundan sonra bana Fatih diyecekler. Ama asıl iş şimdi başlıyor: bu şehri yeniden kurmak.'],
+              again:'Asıl iş şimdi başlıyor.'}
+          ]}
+        },
+        clues:{
+          s1:{t:'Üç dalga', x:'Önce hafif birlikler, sonra daha iyi silahlı birlikler, en son yeniçeriler saldırdı.', f:'29 Mayıs’taki saldırı üç dalga hâlinde yapıldı: önce ikinci sınıf birlikler, sonra daha iyi silahlanmış birlikler, en son yeniçeriler. [9]'},
+          s2:{t:'Küçük kapı', x:'Yeniçeriler Kerkoporta adlı küçük kapıdan girip surun tepesine sancak dikti.', f:'Yeniçeriler kara surlarındaki küçük Kerkoporta kapısını kullanıp surun tepesine bayrak dikti. İmparator XI. Konstantinos muhtemelen Aziz Romanos Kapısı yakınında savaşırken öldü; cesedi bulunamadı. [9]'},
+          s3:{t:'Öğleden sonra', x:'Mehmed şehre öğleden sonra girdi, yağmayı durdurdu ve Ayasofya’ya geldi.', f:'II. Mehmed şehre öğleden sonra girdi, yağmayı durdurdu ve Ayasofya’nın camiye çevrildiğini ilan etti. Beyaz bir atla Ayasofya’ya gittiği aktarılır. [8][9]'}
+        },
+        q:'Son hücumda en son hangi birlik ileri sürüldü?', opts:['Hafif birlikler','Donanma askerleri','Yeniçeriler','Topçular'], ans:2,
+        end:'29 Mayıs 1453’te şehir alındı. II. Mehmed artık Fatih, Konstantinopolis de Osmanlı’nın başkenti.',
+        real:'Saldırı 29 Mayıs 1453 Salı günü şafakta, karadan ve denizden yapıldı. Kara surları şehrin batısındadır; bu yüzden şafakta güneş surların ardından doğar. Mehmed şehri başkent yaptı ve Fatih olarak anıldı. [8][9]',
+        fic:'Çavuş, yeniçeri ve kâtip kurgudur.' },
+
+      { title:'Kayıp Ferman (kurgu vaka)', place:'Topkapı Sarayı · 16. yüzyıl',
+        intro:'Fetihten yüz yıl sonra, Topkapı Sarayı. Divan toplantısı az önce bitti. Tuğralı bir ferman, mürekkebi kurusun diye bırakıldığı rahleden kayboldu. Ulak yola çıkmadan fermanı bul.',
+        first:'a',
+        rooms:{
+          a:{name:'Divan kapısı', bg:'divan', light:'ic', photo:{file:'4146 Istanbul - Topkapi - Divano.jpg', by:'Giovanni Dall’Orto', lic:'atıf şartıyla serbest'},
+            exits:[{side:'right', to:'b', label:'İkinci avlu'}], npcs:[
+            {id:'yeniceri', name:'Yeniçeri nöbetçi', x:22, y:108, fig:F.yeniceri,
               lines:['Dur yolcu. Divan dağılalı beri bu kapıdan kuş uçmadı.','Yalnız mutfaktan gelen bir çırak geçti. Elinde örtülü bir tepsiyle avluya çıktı.','Örtüsünü kaldırıp bakmadım. Sofraya el uzatılmaz.'],
               clue:'c1', again:'Dedim ya: kapıdan yalnız tepsiyi taşıyan çırak çıktı.'},
-            {id:'katip', name:'Divan kâtibi', x:74, y:112, fig:{hat:'kavuk', robe:'#2e6b4f', arm:'#245540', trim:'#c8372d', belt:'#c9a227', beard:'full', item:'scroll'},
+            {id:'katip', name:'Divan kâtibi', x:74, y:112, fig:F.katip,
               lines:['Fermanın tuğrası çekildi, nişancı efendi bana teslim etti.','Mürekkep yaştı. Kurusun diye rahleye, yemek tepsisinin hemen yanına bıraktım.','Döndüğümde tepsi de yoktu, ferman da.'],
-              clue:'c2', again:'Ferman yaş mürekkeple, tepsinin yanında duruyordu. Başka bir şey bilmiyorum.'},
+              clue:'c2', again:'Ferman yaş mürekkeple, tepsinin yanında duruyordu.'},
             {id:'rahle', name:'Boş rahle', x:50, y:118, prop:'rahle',
-              lines:['Rahlenin üstü boş. Tahtada yuvarlak bir tepsi izi ve bir damla mürekkep var.'], again:'Tepsi izi ve bir damla mürekkep. Başka bir şey yok.'}
+              lines:['Rahlenin üstü boş. Tahtada yuvarlak bir tepsi izi ve bir damla mürekkep var.'], again:'Tepsi izi ve bir damla mürekkep.'}
           ]},
-        b:{name:'İkinci avlu, mutfak yanı', bg:'avlu', photo:{file:'Second Court Topkapi 2007 80.JPG', by:'Gryffindor', lic:'kamu malı'},
-          exits:[{side:'left', to:'a', label:'Divan kapısı'}],
-          npcs:[
+          b:{name:'İkinci avlu, mutfak yanı', bg:'avlu', light:'ogle', photo:{file:'Second Court Topkapi 2007 80.JPG', by:'Gryffindor', lic:'kamu malı'},
+            exits:[{side:'left', to:'a', label:'Divan kapısı'}], npcs:[
             {id:'icoglan', name:'Saray içoğlanı', x:66, y:108, fig:{hat:'takke', robe:'#3d5a9a', arm:'#30487c', trim:'#c9a227', belt:'#c8372d'},
               need:'c2', needLine:'Bir şey mi kayboldu? Önce kâtip efendiyle konuş ki neyi aradığını bileyim.',
               lines:['Tepsiyi taşıyan çırağı az önce burada gördüm.','Tepsinin altındaki örtünün ucunda taze bir mürekkep lekesi vardı. Aşçı işi değil o leke.'],
               clue:'c3', again:'Örtüdeki leke tazeydi, gözümle gördüm.'},
             {id:'tepsi', name:'Örtülü tepsi', x:30, y:116, prop:'tepsi',
-              lines:['Mutfak kapısının önünde örtülü bir tepsi duruyor. Örtünün bir ucu koyu lekeli.'], again:'Örtünün ucu lekeli. Altında ne var acaba?'}
+              lines:['Mutfak kapısının önünde örtülü bir tepsi duruyor. Örtünün bir ucu koyu lekeli.'], again:'Örtünün ucu lekeli.'}
           ]}
-      },
-      clues:{
-        c1:{t:'Kapıdan tek çıkan', x:'Toplantıdan sonra kapıdan yalnızca örtülü tepsiyi taşıyan mutfak çırağı çıktı.', f:'Yeniçerilerin ocak kazanlarını meydana çıkarması, yani “kazan kaldırma”, ayaklanmaya niyetlendiklerinin göstergesiydi. Komutanlarına “çorbacı” denirdi. [3]'},
-        c2:{t:'Yaş mürekkep', x:'Ferman, mürekkebi yaşken yemek tepsisinin hemen yanına bırakılmıştı.', f:'Tuğra padişahın işaretidir. Padişahın tuğrasını çekmekle görevli yüksek memura nişancı denirdi; taşraya giden fermanlarda tuğra mutlaka bulunurdu. [2]'},
-        c3:{t:'Örtüdeki leke', x:'Tepsi örtüsünün ucunda taze bir mürekkep lekesi görüldü.', f:'Divan-ı Hümayun, Topkapı Sarayı’nın ikinci avlusundaki Kubbealtı’nda toplanırdı. Padişah görüşmeleri kafesli bir pencerenin arkasından dinleyebilirdi. [1]'}
-      },
-      q:'Ferman şimdi nerede?', opts:['Kapıdan çıkıp şehre gitti','Kâtibin kesesinde','Mutfak kapısında, tepsi örtüsünün altında','Padişahın kafesli penceresinde'], ans:2,
-      end:'Kimse çalmamış. Yaş mürekkepli ferman tepsi örtüsüne yapışmış ve çırakla birlikte mutfağa gitmiş. Ulak yola vaktinde çıktı.',
-      real:'Divan-ı Hümayun 16. yüzyılda haftada dört beş gün, Topkapı Sarayı’nın ikinci avlusundaki Kubbealtı’nda toplanırdı. Tuğra, nişancı ve yeniçerilerin kazan kaldırması gerçektir. [1][2][3]',
-      fic:'Kayıp ferman olayı, tepsi ve buradaki kişiler bu oyun için uyduruldu.'
-    },
-    bizans:{
-      name:'Bizans', place:'Konstantinopolis · 6. yüzyıl', title:'İpeğin Sırrı', sw:['#1c1026','#6b2d84','#d9a93a'],
-      intro:'İmparator Justinianus ipeğin sırrını istiyor. Doğudan dönen bir yolcunun ipek böceği yumurtası getirdiği söyleniyor ama muhafızlar hiçbir şey bulamadı. Yumurtalar nerede saklı?',
-      first:'a',
-      rooms:{
-        a:{name:'Hipodrom', bg:'hipodrom', photo:{file:'Hippodrome of Constantinople (8394994973).jpg', by:'Jorge Láscar', lic:'CC BY 2.0'},
-          exits:[{side:'right', to:'b', label:'İpek atölyesi'}],
-          npcs:[
+        },
+        clues:{
+          c1:{t:'Kapıdan tek çıkan', x:'Toplantıdan sonra kapıdan yalnızca örtülü tepsiyi taşıyan mutfak çırağı çıktı.', f:'Yeniçerilerin ocak kazanlarını meydana çıkarması, yani “kazan kaldırma”, ayaklanmaya niyetlendiklerinin göstergesiydi. Komutanlarına “çorbacı” denirdi. [3]'},
+          c2:{t:'Yaş mürekkep', x:'Ferman, mürekkebi yaşken yemek tepsisinin hemen yanına bırakılmıştı.', f:'Tuğra padişahın işaretidir. Padişahın tuğrasını çekmekle görevli yüksek memura nişancı denirdi; taşraya giden fermanlarda tuğra mutlaka bulunurdu. [2]'},
+          c3:{t:'Örtüdeki leke', x:'Tepsi örtüsünün ucunda taze bir mürekkep lekesi görüldü.', f:'Divan-ı Hümayun, Topkapı Sarayı’nın ikinci avlusundaki Kubbealtı’nda toplanırdı. Padişah görüşmeleri kafesli bir pencerenin arkasından dinleyebilirdi. [1]'}
+        },
+        q:'Ferman şimdi nerede?', opts:['Kapıdan çıkıp şehre gitti','Kâtibin kesesinde','Mutfak kapısında, tepsi örtüsünün altında','Padişahın kafesli penceresinde'], ans:2,
+        end:'Kimse çalmamış. Yaş mürekkepli ferman tepsi örtüsüne yapışmış ve çırakla birlikte mutfağa gitmiş. Ulak yola vaktinde çıktı.',
+        real:'Divan-ı Hümayun 16. yüzyılda haftada dört beş gün, Topkapı Sarayı’nın ikinci avlusundaki Kubbealtı’nda toplanırdı. Tuğra, nişancı ve yeniçerilerin kazan kaldırması gerçektir. [1][2][3]',
+        fic:'Bu bölümün olayı baştan sona kurgudur: kayıp ferman, tepsi ve kişiler uyduruldu.' }
+    ]},
+
+    bizans:{ name:'Bizans', sw:['#1c1026','#6b2d84','#d9a93a'], chapters:[
+      { title:'İpeğin Sırrı', place:'Konstantinopolis · 6. yüzyıl',
+        intro:'İmparator Justinianus ipeğin sırrını istiyor. Doğudan dönen bir yolcunun ipek böceği yumurtası getirdiği söyleniyor ama muhafızlar hiçbir şey bulamadı. Yumurtalar nerede saklı?',
+        first:'a',
+        rooms:{
+          a:{name:'Hipodrom', bg:'hipodrom', light:'ikindi', photo:{file:'Hippodrome of Constantinople (8394994973).jpg', by:'Jorge Láscar', lic:'CC BY 2.0'},
+            exits:[{side:'right', to:'b', label:'İpek atölyesi'}], npcs:[
             {id:'muhafiz', name:'Saray muhafızı', x:24, y:108, fig:{hat:'migfer', robe:'#7a2330', arm:'#5f1a25', trim:'#d9a93a', belt:'#3a2a1a', beard:'must', item:'spear'},
               lines:['Limandan gelen herkesin heybesini, kuşağını tek tek aradım.','Keşişin yanında yalnız asası vardı. Yaşlı adam ona yaslanıyor, asaya dokunmadım.'],
               clue:'b1', again:'Heybeler ve kuşaklar temiz. Asaya bakmadım, o kadar.'},
@@ -258,34 +462,31 @@ a{color:var(--accent)}
               lines:['O keşişi yolda gördüm.','Asası taşa vurdukça tok değil, kof bir ses çıkarıyordu. İçi boş gibi.'],
               clue:'b3', again:'Kof ses diyorum. Dolu ağaç öyle ötmez.'}
           ]},
-        b:{name:'İpek atölyesi', bg:'atolye',
-          exits:[{side:'left', to:'a', label:'Hipodrom'}],
-          npcs:[
+          b:{name:'İpek atölyesi', bg:'atolye', light:'ic', exits:[{side:'left', to:'a', label:'Hipodrom'}], npcs:[
             {id:'dokumaci', name:'İpek dokumacısı', x:30, y:110, fig:{hat:'scarf', robe:'#2f6f73', arm:'#245659', trim:'#e3b84d', belt:'#e3b84d'},
               lines:['İpek böceğinin yumurtası haşhaş tanesi kadar küçüktür.','Yolda ezilmemeli. Sert ve kapalı bir şeyin içinde taşınmış olmalı.'],
               clue:'b2', again:'Küçücük şeylerdir. Sert, kapalı bir kap ister.'},
             {id:'kesis', name:'Yolcu keşiş', x:72, y:114, fig:{hat:'hood', robe:'#4a3b34', arm:'#3b2f29', beard:'full', hair:'#c9c4bc', item:'staff'},
               lines:['Yol uzundu evladım. Asam olmasa buraya varamazdım.'], again:'Asamı bırakmam evladım, dizlerim tutmuyor.'}
           ]}
-      },
-      clues:{
-        b1:{t:'Aranmayan tek şey', x:'Muhafız heybeleri ve kuşakları aradı ama keşişin asasına dokunmadı.', f:'İpek Bizans’ta çok değerliydi. İmparatorluk moruyla boyanmış ipek giysiler neredeyse yalnızca seçkinlere ayrılmıştı. [6]'},
-        b2:{t:'Küçük ve kırılgan', x:'Yumurtalar çok küçük. Sert ve kapalı bir şeyin içinde taşınmış olmalı.', f:'Tarihçi Prokopios, Hindistan’dan gelen keşişlerin Justinianus’a ipek böceği yumurtası getirdiğini yazar. [5]'},
-        b3:{t:'Kof ses', x:'Keşişin asası yere vurunca içi boşmuş gibi ses çıkarıyor.', f:'Hipodrom’daki yarışların taraftar grupları Maviler ve Yeşiller, Ocak 532’deki Nika Ayaklanması’nda birleşip yönetime karşı çıktı. “Nika”, yarışlardaki “Kazan!” tezahüratıydı. [4]'}
-      },
-      q:'Yumurtalar nerede saklı?', opts:['Keşişin heybesinde','İçi oyuk asanın içinde','Dokumacının tezgâhında','Arabacının kuşağında'], ans:1,
-      end:'Yumurtalar içi oyulmuş asanın içindeydi. İpeğin sırrı artık Konstantinopolis’te.',
-      real:'Prokopios keşişlerden söz eder. Yumurtaların bir asanın içinde taşındığı ayrıntısı daha geç bir anlatımda, Theophanes’te geçer ve orada kaçakçı bir Pers’tir. Tarihçiler bu hikâyeyi efsane niteliğinde görür. [5]',
-      fic:'Muhafız, dokumacı ve arabacı bu oyun için uyduruldu.'
-    },
-    roma:{
-      name:'Antik Roma', place:'Roma · MÖ 1. yüzyıl', title:'Şifreli Mektup', sw:['#efe9e1','#b9a48c','#a3271f'],
-      intro:'Bir ulak Forum’da bayıldı. Kesesinden tek kelimelik şifreli bir not çıktı: RVWLD. Mektubun hangi şehre gideceğini bul.',
-      first:'a',
-      rooms:{
-        a:{name:'Forum', bg:'forum',
-          exits:[{side:'right', to:'b', label:'Liman yolu'}],
-          npcs:[
+        },
+        clues:{
+          b1:{t:'Aranmayan tek şey', x:'Muhafız heybeleri ve kuşakları aradı ama keşişin asasına dokunmadı.', f:'İpek Bizans’ta çok değerliydi. İmparatorluk moruyla boyanmış ipek giysiler neredeyse yalnızca seçkinlere ayrılmıştı. [6]'},
+          b2:{t:'Küçük ve kırılgan', x:'Yumurtalar çok küçük. Sert ve kapalı bir şeyin içinde taşınmış olmalı.', f:'Tarihçi Prokopios, Hindistan’dan gelen keşişlerin Justinianus’a ipek böceği yumurtası getirdiğini yazar. [5]'},
+          b3:{t:'Kof ses', x:'Keşişin asası yere vurunca içi boşmuş gibi ses çıkarıyor.', f:'Hipodrom’daki yarışların taraftar grupları Maviler ve Yeşiller, Ocak 532’deki Nika Ayaklanması’nda birleşip yönetime karşı çıktı. “Nika”, yarışlardaki “Kazan!” tezahüratıydı. [4]'}
+        },
+        q:'Yumurtalar nerede saklı?', opts:['Keşişin heybesinde','İçi oyuk asanın içinde','Dokumacının tezgâhında','Arabacının kuşağında'], ans:1,
+        end:'Yumurtalar içi oyulmuş asanın içindeydi. İpeğin sırrı artık Konstantinopolis’te.',
+        real:'Prokopios keşişlerden söz eder. Yumurtaların bir asanın içinde taşındığı ayrıntısı daha geç bir anlatımda, Theophanes’te geçer ve orada kaçakçı bir Pers’tir. Tarihçiler bu hikâyeyi efsane niteliğinde görür. [5]',
+        fic:'Muhafız, dokumacı ve arabacı bu oyun için uyduruldu.' }
+    ]},
+
+    roma:{ name:'Antik Roma', sw:['#efe9e1','#b9a48c','#a3271f'], chapters:[
+      { title:'Şifreli Mektup', place:'Roma · MÖ 1. yüzyıl',
+        intro:'Bir ulak Forum’da bayıldı. Kesesinden tek kelimelik şifreli bir not çıktı: RVWLD. Mektubun hangi şehre gideceğini bul.',
+        first:'a',
+        rooms:{
+          a:{name:'Forum', bg:'forum', light:'ogle', exits:[{side:'right', to:'b', label:'Liman yolu'}], npcs:[
             {id:'lejyoner', name:'Lejyoner', x:22, y:108, fig:{hat:'crest', robe:'#a3271f', arm:'#7f1e18', trim:'#b9b3a8', belt:'#5a3b22', item:'spear'},
               lines:['Ulak komutanın adamı. Notu ben buldum: R, V, W, L, D.','Komutan, mektuplarını herkes okuyamasın diye harfleri kaydırarak yazar derler.'],
               clue:'r1', again:'Not burada: R V W L D. Gerisini ben çözemem.'},
@@ -295,25 +496,24 @@ a{color:var(--accent)}
             {id:'ulak', name:'Baygın ulak', x:50, y:120, prop:'lying',
               lines:['Ulak derin derin soluyor. Yanında boş bir deri kese var.'], again:'Hâlâ baygın. Soluğu düzenli.'}
           ]},
-        b:{name:'Liman yolu', bg:'yol', photo:{file:'Ostia Antica - Via Delle Tombe.jpg', by:'ZeWrestler', lic:'CC BY-SA 3.0'},
-          exits:[{side:'left', to:'a', label:'Forum'}],
-          npcs:[
+          b:{name:'Liman yolu', bg:'yol', light:'ikindi', photo:{file:'Ostia Antica - Via Delle Tombe.jpg', by:'ZeWrestler', lic:'CC BY-SA 3.0'},
+            exits:[{side:'left', to:'a', label:'Forum'}], npcs:[
             {id:'tuccar', name:'Tüccar', x:60, y:112, fig:{hat:'band', robe:'#8a6a2f', arm:'#6f5525', trim:'#3a1f1a', belt:'#3a1f1a', beard:'full'},
               need:'r2', needLine:'Harflerle aram iyidir ama neyi sayacağımı bilmiyorum. Önce Forum’daki yazıcıya sor.',
               lines:['Sayması kolay olsun diye alfabeyi tezgâha yazdım.','A B C D E F G H I J K L M N O P Q R S T U V W X Y Z. Hadi, her harften üç geri say.'],
               clue:'r3', again:'Alfabe defterinde yazılı. R’den üç geri say bakalım.'}
           ]}
-      },
-      clues:{
-        r1:{t:'Kaydırılmış harfler', x:'Notta RVWLD yazıyor. Komutan harfleri kaydırarak yazıyor.', f:'SPQR, “Roma Senatosu ve Halkı” anlamına gelen Latince kısaltmadır.'},
-        r2:{t:'Üç harf', x:'Her harf, alfabede üç sonraki harfle değiştirilmiş. Çözmek için her harften üç geri sayılır.', f:'Suetonius, Caesar’ın özel mektuplarını şifreyle yazdığını ve çözmek için A yerine alfabenin dördüncü harfi D’nin konması gerektiğini aktarır. [7]'},
-        r3:{t:'Alfabe', x:'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z', f:'Oyunda sayması kolay olsun diye bugünkü 26 harfli alfabe kullanıldı.'}
-      },
-      q:'Mektup hangi şehre gidecek?', opts:['CAPUA','GENUA','OSTIA','PARMA'], ans:2,
-      end:'RVWLD, her harften üç geri sayınca OSTIA olur. Mektup Roma’nın limanına gidiyor.',
-      real:'Suetonius’un aktardığı bu yöntem bugün Sezar şifresi olarak bilinir. Ostia, Roma’nın Tiber Nehri ağzındaki limanıydı. [7]',
-      fic:'Ulak, not ve buradaki kişiler bu oyun için uyduruldu.'
-    }
+        },
+        clues:{
+          r1:{t:'Kaydırılmış harfler', x:'Notta RVWLD yazıyor. Komutan harfleri kaydırarak yazıyor.', f:'SPQR, “Roma Senatosu ve Halkı” anlamına gelen Latince kısaltmadır.'},
+          r2:{t:'Üç harf', x:'Her harf, alfabede üç sonraki harfle değiştirilmiş. Çözmek için her harften üç geri sayılır.', f:'Suetonius, Caesar’ın özel mektuplarını şifreyle yazdığını ve çözmek için A yerine alfabenin dördüncü harfi D’nin konması gerektiğini aktarır. [7]'},
+          r3:{t:'Alfabe', x:'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z', f:'Oyunda sayması kolay olsun diye bugünkü 26 harfli alfabe kullanıldı.'}
+        },
+        q:'Mektup hangi şehre gidecek?', opts:['CAPUA','GENUA','OSTIA','PARMA'], ans:2,
+        end:'RVWLD, her harften üç geri sayınca OSTIA olur. Mektup Roma’nın limanına gidiyor.',
+        real:'Suetonius’un aktardığı bu yöntem bugün Sezar şifresi olarak bilinir. Ostia, Roma’nın Tiber Nehri ağzındaki limanıydı. [7]',
+        fic:'Ulak, not ve buradaki kişiler bu oyun için uyduruldu.' }
+    ]}
   };
   var SOURCES = [
     ['TDV İslâm Ansiklopedisi, “Dîvân-ı Hümâyun”','https://islamansiklopedisi.org.tr/divan-i-humayun'],
@@ -322,25 +522,58 @@ a{color:var(--accent)}
     ['Encyclopaedia Britannica, “Nika riots”','https://www.britannica.com/topic/Nika-riots'],
     ['American Historical Association, “Legendary Silk Heists”','https://www.historians.org/resource/legendary-silk-heists/'],
     ['Wikipedia, “Smuggling of silkworm eggs into the Roman Empire”','https://en.wikipedia.org/wiki/Smuggling_of_silkworm_eggs_into_the_Roman_Empire'],
-    ['Suetonius, Julius Caesar’ın Hayatı 56.6 (Lexundria)','https://lexundria.com/suet_jul/56.6']
+    ['Suetonius, Julius Caesar’ın Hayatı 56.6 (Lexundria)','https://lexundria.com/suet_jul/56.6'],
+    ['Encyclopaedia Britannica, “Fall of Constantinople”','https://www.britannica.com/event/Fall-of-Constantinople-1453'],
+    ['World History Encyclopedia, “1453: İstanbul’un Fethi”','https://www.worldhistory.org/trans/tr/2-1180/1453-istanbulun-fethi/'],
+    ['TDV İslâm Ansiklopedisi, “Çandarlı Halil Paşa”','https://islamansiklopedisi.org.tr/candarli-halil-pasa'],
+    ['Wikipedia, “Rumelihisarı”','https://en.wikipedia.org/wiki/Rumelihisar%C4%B1']
   ];
+  /* time of day for each room: sky colours, where the sun or moon stands, shadow length and a colour wash */
+  var LIGHTS = {
+    sabah:{name:'sabah', sky:['#f0b97a','#f8ecd6'], sun:[16,66], len:.55, tint:'rgba(255,186,110,.10)'},
+    ogle:{name:'öğle', sky:['#6fb0e6','#e8f2f6'], sun:[54,10], len:.14, tint:null},
+    ikindi:{name:'ikindi', sky:['#7fb1dc','#f1e6cf'], sun:[84,36], len:.38, tint:'rgba(255,200,120,.07)'},
+    aksam:{name:'akşamüstü', sky:['#d9773f','#f6d7a2'], sun:[86,68], len:.7, tint:'rgba(255,130,50,.14)'},
+    safak:{name:'şafak', sky:['#1b2648','#e58f5c'], sun:[50,86], len:.85, tint:'rgba(30,40,95,.26)', dim:true},
+    gece:{name:'gece', sky:['#0a1030','#27345e'], moon:[78,18], len:.3, tint:'rgba(14,24,70,.36)', dim:true},
+    ic:{name:'iç mekân', indoor:true, tint:null},
+    ates:{name:'gece, ocak ateşi', indoor:true, tint:'rgba(255,110,30,.15)'},
+    kandil:{name:'gece, kandil ışığı', indoor:true, tint:'rgba(255,170,60,.13)'}
+  };
 
   var $ = function(id){ return document.getElementById(id); };
   var NS = 'http://www.w3.org/2000/svg';
 
   /* ---------- saved progress ---------- */
   function blank(){ return {clues:[], solved:false, seen:false, room:null, done:{}}; }
+  function blankEra(id){ return {ch:0, max:0, chs:ERAS[id].chapters.map(blank)}; }
   var P = {era:'osmanli', eras:{}};
   try{ var raw = localStorage.getItem(KEY); if (raw){ var o = JSON.parse(raw); if (o && o.eras) P = o; } }catch(e){}
-  ORDER.forEach(function(id){ if (!P.eras[id]) P.eras[id] = blank(); if (!P.eras[id].done) P.eras[id].done = {}; });
+  ORDER.forEach(function(id){
+    var s = P.eras[id], n = ERAS[id].chapters.length;
+    if (!s || !s.chs || s.chs.length !== n) s = P.eras[id] = blankEra(id);
+    s.chs.forEach(function(c){ if (!c.done) c.done = {}; if (!c.clues) c.clues = []; });
+    s.ch = Math.max(0, Math.min(n-1, s.ch|0));
+    s.max = Math.max(s.ch, Math.min(n-1, s.max|0));
+  });
   if (ORDER.indexOf(P.era) < 0) P.era = 'osmanli';
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(P)); }catch(e){} }
-  function E(){ return ERAS[P.era]; }
-  function st(){ return P.eras[P.era]; }
+  function ERA(){ return ERAS[P.era]; }
+  function ES(){ return P.eras[P.era]; }
+  function E(){ return ERA().chapters[ES().ch]; }
+  function st(){ return ES().chs[ES().ch]; }
   function R(){ var e = E(); return e.rooms[st().room] || e.rooms[e.first]; }
   function has(c){ return st().clues.indexOf(c) >= 0; }
   function total(){ return Object.keys(E().clues).length; }
   function findNpc(id){ var r = E().rooms, k, i; for (k in r){ for (i=0;i<r[k].npcs.length;i++) if (r[k].npcs[i].id===id) return r[k].npcs[i]; } return null; }
+  function eraSolved(id){ return P.eras[id].chs.every(function(c){ return c.solved; }); }
+  function light(r){ return LIGHTS[r.light] || LIGHTS.ogle; }
+  /* shadow cast on the ground: leans away from the sun, longer when the sun is low */
+  function cast(L){
+    if (L.indoor) return '';
+    var s = L.sun || L.moon || [50,10], k = ((s[0]-50)/50*0.55).toFixed(3);
+    return '<g transform="matrix(1 0 '+k+' '+(-L.len)+' 0 0)" opacity="'+(L.dim ? .2 : .28)+'" fill="#000"><path d="M-7 -2.4L-8.6 -22Q-9.2 -33.4 -5 -35.4H5Q9.2 -33.4 8.6 -22L7 -2.4Z"/><circle cx="0" cy="-42" r="5.3"/></g>';
+  }
 
   /* ---------- characters: drawn in code, with faces, arms and hands ---------- */
   var O = 'stroke="var(--outline)" stroke-width=".5" stroke-linejoin="round"';
@@ -395,13 +628,25 @@ a{color:var(--accent)}
   }
   function prop(kind){
     if (kind==='rahle') return '<ellipse cx="0" cy="0" rx="11" ry="2.4" fill="rgba(0,0,0,.28)"/><path d="M-9 0L6 -15M9 0L-6 -15" stroke="#7a5a35" stroke-width="2.2" stroke-linecap="round"/><rect x="-10.5" y="-18" width="21" height="3" rx="1" fill="#9a7445" '+O+'/><circle cx="4" cy="-18.4" r="1" fill="#1a2233"/><ellipse cx="-3" cy="-18.2" rx="4.4" ry=".7" fill="none" stroke="#6b4a2b" stroke-width=".4"/>';
+    if (kind==='top') return '<ellipse cx="0" cy="0" rx="20" ry="3" fill="rgba(0,0,0,.28)"/><rect x="-18" y="-17" width="36" height="10" rx="5" fill="#a8752e" '+O+'/><path d="M-10 -17v10M0 -17v10M10 -17v10" stroke="#5a3b17" stroke-width="1.2"/><ellipse cx="18" cy="-12" rx="1.8" ry="4" fill="#1a130e"/><rect x="-16" y="-7" width="30" height="3" fill="#7a5a35" '+O+'/><circle cx="-10" cy="-3" r="4" fill="#5a3b22" '+O+'/><circle cx="8" cy="-3" r="4" fill="#5a3b22" '+O+'/><circle cx="-10" cy="-3" r="1" fill="#c9a227"/><circle cx="8" cy="-3" r="1" fill="#c9a227"/>';
     if (kind==='tepsi') return '<ellipse cx="0" cy="0" rx="10" ry="2.2" fill="rgba(0,0,0,.28)"/><path d="M-5 0L-4 -8H4L5 0Z" fill="#7a5a35" '+O+'/><ellipse cx="0" cy="-8.6" rx="10" ry="2.2" fill="#c9a227" '+O+'/><path d="M-8 -9Q0 -18 8 -9Q4 -7.4 0 -7.6Q-4 -7.4 -8 -9Z" fill="#f4efe6" '+O+'/><path d="M5.4 -9.6q1.8 1 2.4 .4" stroke="#1a2233" stroke-width="1.2" stroke-linecap="round" fill="none"/>';
     return '<ellipse cx="0" cy="0" rx="15" ry="2.8" fill="rgba(0,0,0,.28)"/><path d="M-8 -6Q0 -9.6 12 -5.4Q13.6 -1.4 10.6 -.6H-8Z" fill="#8f7a63" '+O+'/><circle cx="-11.4" cy="-4.6" r="4.4" fill="#e0b08a" '+O+'/><path d="M-13 -5.4h1.6M-10.6 -5.4h1.6" stroke="#2a1a12" stroke-width=".5"/><rect x="13" y="-4.8" width="5" height="4.2" rx=".9" fill="#6b4a2b" '+O+'/>';
   }
 
   /* ---------- drawn backdrops (used on their own, and under a photo until it loads) ---------- */
-  function sky(a, b){ return '<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+a+'"/><stop offset="1" stop-color="'+b+'"/></linearGradient></defs><rect width="100" height="92" fill="url(#sk)"/>'; }
-  function backdrop(kind){
+  function sky(L){
+    var c = L.sky || ['#6fb0e6','#e8f2f6'];
+    var h = '<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c[0]+'"/><stop offset="1" stop-color="'+c[1]+'"/></linearGradient></defs><rect width="100" height="92" fill="url(#sk)"/>';
+    if (L.sun) h += '<circle cx="'+L.sun[0]+'" cy="'+L.sun[1]+'" r="13" fill="#fff3c4" opacity=".3"/><circle cx="'+L.sun[0]+'" cy="'+L.sun[1]+'" r="5.4" fill="#ffe9a3"/>';
+    if (L.moon) h += '<circle cx="'+L.moon[0]+'" cy="'+L.moon[1]+'" r="5" fill="#f3efdc"/><circle cx="'+(L.moon[0]+2.2)+'" cy="'+(L.moon[1]-1)+'" r="4.4" fill="'+c[0]+'"/><g fill="#fff" opacity=".8"><circle cx="14" cy="12" r=".5"/><circle cx="32" cy="24" r=".4"/><circle cx="48" cy="8" r=".5"/><circle cx="62" cy="30" r=".4"/><circle cx="90" cy="38" r=".5"/><circle cx="22" cy="40" r=".4"/></g>';
+    return h;
+  }
+  function wallRow(y, hgt, fill, crenel){
+    var h = '<rect y="'+y+'" width="100" height="'+hgt+'" fill="'+fill+'"/>', i;
+    for (i=0;i<17;i++) h += '<rect x="'+(i*6)+'" y="'+(y-2.4)+'" width="3.4" height="2.6" fill="'+(crenel||fill)+'"/>';
+    return h;
+  }
+  function backdrop(kind, L){
     var h = '', i, x;
     if (kind==='divan'){
       h += '<rect width="100" height="92" fill="#1d4e89"/>';
@@ -412,8 +657,9 @@ a{color:var(--accent)}
       h += '<rect y="92" width="100" height="38" fill="#d9cfb8"/><path d="M0 92H100" stroke="#b88a1e" stroke-width="1.2"/>';
       for (i=0;i<6;i++) h += '<path d="M'+(i*20-10)+' 130L'+(30+i*8)+' 92" stroke="#c4b89c" stroke-width=".6"/>';
       h += '<path d="M24 100H76L84 126H16Z" fill="#9e2b25"/><path d="M28 103H72L78 123H22Z" fill="none" stroke="#b88a1e" stroke-width=".8"/>';
+      h += '<path d="M10 46L34 92H4Z" fill="#fff3c4" opacity=".13"/>';
     } else if (kind==='avlu'){
-      h += sky('#9cc7e4','#e6f0f3');
+      h += sky(L);
       h += '<rect y="52" width="100" height="40" fill="#e3d9c3"/><rect y="48" width="100" height="5" fill="#b3261e"/>';
       for (i=0;i<4;i++){ x = 3+i*25; h += '<path d="M'+x+' 92V66Q'+(x+10)+' 50 '+(x+20)+' 66V92Z" fill="#6f6557"/><rect x="'+(x-1.6)+'" y="64" width="2.6" height="28" fill="#f3ede0"/>'; }
       for (i=0;i<3;i++){ x = 15+i*30; h += '<path d="M'+x+' 52Q'+(x-4)+' 30 '+x+' 12Q'+(x+4)+' 30 '+x+' 52Z" fill="#2f5a3c"/>'; }
@@ -421,7 +667,7 @@ a{color:var(--accent)}
       h += '<rect y="92" width="100" height="38" fill="#cfc6b2"/>';
       for (i=0;i<9;i++) h += '<path d="M0 '+(96+i*4.4)+'H100" stroke="#bdb39c" stroke-width=".5"/>';
     } else if (kind==='hipodrom'){
-      h += sky('#7fb1dc','#f1e6cf');
+      h += sky(L);
       h += '<path d="M0 92V62Q50 50 100 62V92Z" fill="#b99f7c"/>';
       for (i=0;i<12;i++) h += '<path d="M'+(2+i*8.4)+' 92V'+(66-Math.sin(i/11*Math.PI)*8)+'h4.6V92z" fill="#8f7658"/>';
       h += '<path d="M46 86L48.4 22L50 16L51.6 22L54 86Z" fill="#c9836e"/><path d="M48.4 22L50 16L51.6 22Z" fill="#e3b84d"/><rect x="43" y="86" width="14" height="6" fill="#e9e2d2"/>';
@@ -437,20 +683,79 @@ a{color:var(--accent)}
       h += '<path d="M78 6h14v16h-14z" fill="#f1d27a"/><path d="M85 6v16M78 14h14" stroke="#3b2a44" stroke-width="1"/>';
       h += '<rect y="92" width="100" height="38" fill="#6a5843"/>'; for (i=0;i<8;i++) h += '<path d="M0 '+(96+i*5)+'H100" stroke="#59493a" stroke-width=".6"/>';
     } else if (kind==='forum'){
-      h += sky('#86b6dd','#f3ead8');
+      h += sky(L);
       h += '<path d="M8 40L50 22L92 40Z" fill="#e9e1d2" stroke="#b9a48c" stroke-width=".8"/><rect x="8" y="40" width="84" height="5" fill="#d9cfbf"/>';
       for (i=0;i<6;i++){ x = 12+i*14.6; h += '<rect x="'+x+'" y="45" width="6.4" height="43" fill="#efe8da" stroke="#b9a48c" stroke-width=".5"/><path d="M'+(x+2.1)+' 46V87M'+(x+4.3)+' 46V87" stroke="#cfc3b0" stroke-width=".5"/><rect x="'+(x-1)+'" y="44" width="8.4" height="2.4" fill="#d9cfbf"/>'; }
       h += '<rect x="6" y="88" width="88" height="4" fill="#cfc3b0"/>';
       h += '<rect y="92" width="100" height="38" fill="#d6cbbb"/>';
       for (i=0;i<7;i++) for (x=0;x<6;x++) h += '<rect x="'+(x*20-(i%2)*10)+'" y="'+(92+i*5.6)+'" width="19" height="5" fill="none" stroke="#bfb3a1" stroke-width=".5"/>';
+    } else if (kind==='hisar'){
+      h += sky(L);
+      h += '<path d="M0 74Q30 62 62 70T100 64V92H0Z" fill="#6f8f6a"/><rect y="80" width="100" height="12" fill="#3f7fa6"/>';
+      h += '<path d="M26 58L72 66V92H26Z" fill="#b3a78f"/>'; for (i=0;i<8;i++) h += '<rect x="'+(28+i*5.6)+'" y="'+(55.6+i*1)+'" width="3" height="3" fill="#b3a78f"/>';
+      h += '<rect x="4" y="30" width="24" height="62" fill="#c3b79f"/>'; for (i=0;i<5;i++) h += '<rect x="'+(4+i*5.2)+'" y="27" width="3.2" height="3.4" fill="#c3b79f"/>';
+      h += '<rect x="70" y="44" width="20" height="48" fill="#bdb199"/><path d="M70 44h20" stroke="#8f8571" stroke-width="1"/>';
+      h += '<g stroke="#7a5a35" stroke-width=".9" fill="none"><path d="M68 44V20M92 44V20M68 30H92M68 20H92M68 30L92 20"/><path d="M30 58V40M46 61V44M30 48H46"/></g>';
+      h += '<g stroke="#9c9079" stroke-width=".4">'; for (i=0;i<7;i++) h += '<path d="M4 '+(38+i*8)+'H28M70 '+(52+i*6)+'H90"/>'; h += '</g>';
+      h += '<rect x="12" y="50" width="4" height="8" rx="2" fill="#4a4336"/>';
+      h += '<rect y="92" width="100" height="38" fill="#b7a98a"/><g fill="#d3c9b2" stroke="#9c9079" stroke-width=".4"><rect x="40" y="96" width="9" height="5"/><rect x="50" y="98" width="8" height="5"/><rect x="44" y="92" width="8" height="4.4"/><rect x="84" y="118" width="10" height="6"/></g>';
+    } else if (kind==='kiyi'){
+      h += sky(L);
+      h += '<path d="M0 60Q26 48 54 56T100 52V72H0Z" fill="#5f8563"/>';
+      h += '<g fill="#d3c9b2" stroke="#8f8571" stroke-width=".4"><rect x="58" y="50" width="6" height="14"/><rect x="64" y="56" width="16" height="8"/><rect x="80" y="52" width="5" height="12"/></g><path d="M58 50l3 -3 3 3zM80 52l2.5 -3 2.5 3z" fill="#8f5a4a"/>';
+      h += '<rect y="68" width="100" height="26" fill="#3f7fa6"/><g stroke="#6aa3c4" stroke-width=".6" fill="none"><path d="M6 74q4 -2 8 0t8 0M40 78q4 -2 8 0t8 0M70 73q4 -2 8 0t8 0M20 86q4 -2 8 0t8 0M62 88q4 -2 8 0t8 0"/></g>';
+      h += '<path d="M14 84h26l-4 6H18z" fill="#6b4a2b" stroke="#3a2a1a" stroke-width=".5"/><path d="M27 84V66" stroke="#3a2a1a" stroke-width=".8"/><path d="M27 67L38 80H27Z" fill="#f1ebe0" stroke="#3a2a1a" stroke-width=".4"/>';
+      h += '<rect y="92" width="100" height="38" fill="#c9bb98"/><path d="M0 96Q50 92 100 97" stroke="#e9dfc6" stroke-width="1.4" fill="none"/><g fill="#a89a78"><circle cx="16" cy="104" r="1.4"/><circle cx="58" cy="120" r="1.8"/><circle cx="86" cy="106" r="1.2"/></g>';
+    } else if (kind==='dokum'){
+      h += '<rect width="100" height="92" fill="#2a211c"/>';
+      for (i=0;i<7;i++) for (x=0;x<7;x++) h += '<rect x="'+(x*16-(i%2)*8)+'" y="'+(i*13.2)+'" width="15" height="12.2" fill="#33281f"/>';
+      h += '<path d="M6 92V46Q24 22 42 46V92Z" fill="#3e2e24"/><path d="M12 92V54Q24 38 36 54V92Z" fill="#ff7a1f"/><path d="M17 92V62Q24 52 31 62V92Z" fill="#ffc94d"/><circle cx="24" cy="70" r="26" fill="#ff8a2a" opacity=".16"/>';
+      h += '<rect x="48" y="60" width="46" height="13" rx="6.5" fill="#a8752e" stroke="#5a3b17" stroke-width=".7"/><g stroke="#5a3b17" stroke-width="1.4"><path d="M56 60v13M68 60v13M80 60v13"/></g><ellipse cx="94" cy="66.5" rx="2.4" ry="5.4" fill="#1a130e"/>';
+      h += '<path d="M54 73v19M88 73v19" stroke="#7a5a35" stroke-width="2.4"/><path d="M60 8V40M60 40l-3 5h6z" stroke="#6b6b6b" stroke-width="1" fill="#6b6b6b"/>';
+      h += '<rect y="92" width="100" height="38" fill="#4a3b30"/><g fill="#2e241d"><circle cx="46" cy="104" r="2"/><circle cx="72" cy="122" r="2.6"/><circle cx="18" cy="118" r="1.6"/></g>';
+    } else if (kind==='surlar'){
+      h += sky(L);
+      h += wallRow(40, 34, '#bcab8e');
+      for (i=0;i<4;i++){ x = 8+i*26; h += '<rect x="'+x+'" y="24" width="13" height="52" fill="#cbbb9e" stroke="#9c8c70" stroke-width=".4"/><rect x="'+(x-.6)+'" y="21.4" width="3.6" height="3" fill="#cbbb9e"/><rect x="'+(x+4.7)+'" y="21.4" width="3.6" height="3" fill="#cbbb9e"/><rect x="'+(x+10)+'" y="21.4" width="3.6" height="3" fill="#cbbb9e"/><rect x="'+(x+5)+'" y="34" width="3" height="6" rx="1.5" fill="#5a4e3c"/>'; }
+      h += '<g stroke="#b3261e" stroke-width=".5">'; for (i=0;i<6;i++) h += '<path d="M0 '+(46+i*5)+'H100"/>'; h += '</g>';
+      h += wallRow(72, 14, '#a59578');
+      h += '<rect y="86" width="100" height="6" fill="#586b56"/>';
+      h += '<rect y="92" width="100" height="38" fill="#b7a47c"/><path d="M0 100Q50 95 100 101M0 116Q50 110 100 117" stroke="#a3906a" stroke-width=".7" fill="none"/>';
+      h += '<path d="M2 92L10 76L18 92Z" fill="#b3261e" stroke="#7a1a14" stroke-width=".4"/><path d="M80 92L89 74L98 92Z" fill="#e9dfc6" stroke="#9c8c70" stroke-width=".4"/><path d="M10 76V70M89 74V68" stroke="#3a2a1a" stroke-width=".6"/><path d="M10 70h4v2.6h-4zM89 68h4v2.6h-4z" fill="#c8372d"/>';
+    } else if (kind==='halic'){
+      h += sky(L);
+      h += '<path d="M0 56Q50 46 100 54V66H0Z" fill="#7f8f6a"/>' + wallRow(58, 8, '#bcab8e');
+      for (i=0;i<5;i++) h += '<rect x="'+(6+i*21)+'" y="50" width="7" height="16" fill="#cbbb9e"/>';
+      h += '<rect y="66" width="100" height="28" fill="#3f7fa6"/><g stroke="#6aa3c4" stroke-width=".6" fill="none"><path d="M8 72q4 -2 8 0t8 0M50 70q4 -2 8 0t8 0M76 76q4 -2 8 0t8 0M30 88q4 -2 8 0t8 0"/></g>';
+      h += '<path d="M0 80Q50 87 100 80" stroke="#22262c" stroke-width="1.5" stroke-dasharray="2.2 1.3" fill="none"/><g fill="#7a5a35" stroke="#3a2a1a" stroke-width=".3"><rect x="18" y="80.6" width="5" height="2.6" rx="1"/><rect x="47" y="83.4" width="5" height="2.6" rx="1"/><rect x="76" y="80.8" width="5" height="2.6" rx="1"/></g>';
+      h += '<g><path d="M30 74h20l-3 4.6H33z" fill="#6b4a2b"/><path d="M40 74V62" stroke="#3a2a1a" stroke-width=".7"/><path d="M40 63l8 9h-8z" fill="#e9dfc6"/><path d="M64 72h16l-2.6 4H66.6z" fill="#6b4a2b"/><path d="M72 72V63" stroke="#3a2a1a" stroke-width=".6"/><path d="M72 64l6 7h-6z" fill="#e9dfc6"/></g>';
+      h += '<rect y="92" width="100" height="38" fill="#c9bb98"/><path d="M0 96Q50 92 100 97" stroke="#e9dfc6" stroke-width="1.4" fill="none"/>';
+      h += '<g stroke="#7a5a35" stroke-width="1.6" stroke-linecap="round"><path d="M70 106h22M72 112h22M74 118h22"/></g>';
+    } else if (kind==='otag'){
+      h += '<rect width="100" height="92" fill="#8f1d18"/>';
+      for (i=0;i<10;i++) h += '<path d="M'+(i*11)+' 0L'+(i*11-4+i*.8)+' 92" stroke="#7a1712" stroke-width="2.2"/>';
+      h += '<path d="M0 14Q50 30 100 14V0H0Z" fill="#6f140f"/><path d="M0 14Q50 30 100 14" stroke="#c9a227" stroke-width="1.2" fill="none"/><path d="M0 70H100" stroke="#c9a227" stroke-width="1"/>';
+      for (i=0;i<9;i++) h += '<path d="M'+(6+i*11)+' 74l2.6 3 -2.6 3 -2.6 -3z" fill="#c9a227"/>';
+      h += '<path d="M50 22V92" stroke="#5a3b22" stroke-width="2.4"/><path d="M50 22V38" stroke="#c9a227" stroke-width=".6"/><circle cx="50" cy="42" r="12" fill="#ffd27a" opacity=".2"/><path d="M46.6 40h6.8l-1.2 5.4h-4.4z" fill="#c9a227"/><path d="M50 40q-1.6 -2.6 0 -4.6q1.6 2 0 4.6" fill="#ffe9a3"/>';
+      h += '<path d="M66 92V76Q76 70 86 76V92Z" fill="#2c4f8a"/><path d="M66 82H86" stroke="#c9a227" stroke-width=".7"/>';
+      h += '<rect y="92" width="100" height="38" fill="#7a3b2a"/><path d="M12 98H88L96 126H4Z" fill="#9e2b25"/><path d="M16 101H84L90 123H10Z" fill="none" stroke="#c9a227" stroke-width=".8"/><path d="M50 104l10 8 -10 8 -10 -8z" fill="none" stroke="#c9a227" stroke-width=".7"/>';
+    } else if (kind==='ayasofya'){
+      h += sky(L);
+      h += '<path d="M10 92V60H90V92Z" fill="#c98f7a"/><path d="M22 60Q50 12 78 60Z" fill="#b9b3a8" stroke="#8f8a80" stroke-width=".5"/><path d="M50 22V15" stroke="#c9a227" stroke-width=".8"/><circle cx="50" cy="14" r="1.2" fill="#c9a227"/>';
+      h += '<path d="M10 60Q20 42 32 60ZM68 60Q80 42 90 60Z" fill="#a9a398"/>';
+      h += '<g fill="#8f6656"><rect x="6" y="56" width="8" height="36"/><rect x="86" y="56" width="8" height="36"/><rect x="34" y="62" width="5" height="30"/><rect x="61" y="62" width="5" height="30"/></g>';
+      for (i=0;i<9;i++) h += '<rect x="'+(30+i*4.6)+'" y="50" width="2" height="4.4" rx="1" fill="#4a4336"/>';
+      for (i=0;i<5;i++) h += '<rect x="'+(18+i*15)+'" y="68" width="4" height="9" rx="2" fill="#5a3b33"/>';
+      h += '<path d="M44 92V78Q50 70 56 78V92Z" fill="#4a3324"/>';
+      h += '<rect y="92" width="100" height="38" fill="#cfc6b2"/>'; for (i=0;i<7;i++) for (x=0;x<6;x++) h += '<rect x="'+(x*20-(i%2)*10)+'" y="'+(92+i*5.6)+'" width="19" height="5" fill="none" stroke="#b9ae98" stroke-width=".5"/>';
     } else {
-      h += sky('#8fbde0','#f4ecd9');
+      h += sky(L);
       for (i=0;i<4;i++){ x = 10+i*27; h += '<path d="M'+x+' 92V60" stroke="#6b4a2b" stroke-width="1.6"/><ellipse cx="'+x+'" cy="54" rx="11" ry="6.4" fill="#3d6b47"/>'; }
       h += '<path d="M2 92V72h14v20zM24 92V78h10v14zM70 92V70h12v22z" fill="#b9886b" stroke="#8f6650" stroke-width=".6"/><path d="M5 72h8v-5h-8zM72 70h8v-6h-8z" fill="#a8775c"/>';
       h += '<rect y="92" width="100" height="38" fill="#8f8a80"/><path d="M34 92H66L92 130H8Z" fill="#a9a398"/>';
       for (i=0;i<6;i++) h += '<path d="M'+(36-i*5)+' '+(96+i*6)+'H'+(64+i*5)+'" stroke="#8f8a80" stroke-width=".7"/>';
     }
-    return h + '<linearGradient id="gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".34"/></linearGradient>';
+    return h + '<linearGradient id="gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient>';
   }
 
   /* ---------- scene ---------- */
@@ -467,7 +772,8 @@ a{color:var(--accent)}
   function photoUrl(p){ return COMMONS+'Special:FilePath/'+encodeURIComponent(p.file)+'?width=900'; }
   function buildScene(){
     var r = R();
-    svg.innerHTML = backdrop(r.bg);
+    var L = light(r);
+    svg.innerHTML = backdrop(r.bg, L);
     var photoLayer = mk('g', {}); svg.appendChild(photoLayer);
     svg.appendChild(mk('rect', {x:0, y:84, width:100, height:46, fill:'url(#gd)', 'pointer-events':'none'}));
     $('credit').hidden = true;
@@ -486,20 +792,21 @@ a{color:var(--accent)}
     r.exits.forEach(function(x){
       var ex = x.side==='left' ? 7 : 93;
       var g = mk('g', {'class':'exit', 'data-exit':x.to, 'role':'button', 'aria-label':x.label+' yönüne git'});
-      g.innerHTML = '<rect x="-9" y="-16" width="18" height="26" fill="transparent"/><circle r="6.4" fill="rgba(15,18,26,.78)" stroke="#fff" stroke-width=".8"/><path d="'+(x.side==='left'?'M2 -3.4L-2 0L2 3.4':'M-2 -3.4L2 0L-2 3.4')+'" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><text y="-9.4" text-anchor="'+(x.side==='left'?'start':'end')+'" x="'+(x.side==='left'?-5.6:5.6)+'" font-size="3.6" font-weight="700" fill="#fff" stroke="rgba(15,18,26,.85)" stroke-width="1.6" paint-order="stroke" font-family="Alegreya Sans, sans-serif">'+x.label+'</text>';
+      g.innerHTML = '<rect x="-9" y="-16" width="18" height="26" fill="transparent"/><circle r="6.4" fill="rgba(15,18,26,.78)" stroke="#fff" stroke-width=".8"/><path d="'+(x.side==='left'?'M2 -3.4L-2 0L2 3.4':'M-2 -3.4L2 0L-2 3.4')+'" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><text pointer-events="none" y="-9.4" text-anchor="'+(x.side==='left'?'start':'end')+'" x="'+(x.side==='left'?-5.6:5.6)+'" font-size="3.6" font-weight="700" fill="#fff" stroke="rgba(15,18,26,.85)" stroke-width="1.6" paint-order="stroke" font-family="Alegreya Sans, sans-serif">'+x.label+'</text>';
       g.setAttribute('transform', 'translate('+ex+' 106)'); g.dataset.y = 200;
       actors.appendChild(g);
     });
     r.npcs.forEach(function(n){
       var g = mk('g', {'class':'npc', 'data-npc':n.id, 'role':'button', 'aria-label':n.name});
-      g.innerHTML = (n.prop ? '<rect x="-13" y="-24" width="26" height="28" fill="transparent"/>'+prop(n.prop) : '<rect x="-12" y="-60" width="24" height="64" fill="transparent"/>'+figure(n.fig))+markHTML(n);
+      g.innerHTML = (n.prop ? '<rect x="-13" y="-24" width="26" height="28" fill="transparent"/>'+prop(n.prop) : '<rect x="-12" y="-60" width="24" height="64" fill="transparent"/>'+cast(L)+figure(n.fig))+markHTML(n);
       place(g, n.x, n.y); actors.appendChild(g);
     });
-    playerEl = mk('g', {});
-    playerEl.innerHTML = figure({hat:'seyyah', robe:'#d8c9a3', arm:'#c2b28a', trim:'#8a6a2f', belt:'#6b4a2b'});
+    playerEl = mk('g', {'pointer-events':'none'});
+    playerEl.innerHTML = cast(L)+figure({hat:'seyyah', robe:'#d8c9a3', arm:'#c2b28a', trim:'#8a6a2f', belt:'#6b4a2b'});
     place(playerEl, pos[0], pos[1]); actors.appendChild(playerEl);
     sortActors();
-    $('roomN').textContent = r.name;
+    if (L.tint) svg.appendChild(mk('rect', {x:0, y:0, width:100, height:130, fill:L.tint, 'pointer-events':'none'}));
+    $('roomN').textContent = r.name+' · '+(r.lname || L.name);
   }
   function refreshMarks(){
     R().npcs.forEach(function(n){
@@ -622,7 +929,7 @@ a{color:var(--accent)}
     var h = $('hint');
     h.classList.toggle('got', !!got);
     if (got) h.textContent = 'Deftere eklendi: '+got+(st().clues.length >= total() ? '. Şimdi defteri aç ve vakayı çöz.' : '.');
-    else h.textContent = st().solved ? 'Vaka çözüldü. Dolaşabilir ya da menüden başka bir döneme geçebilirsin.'
+    else h.textContent = st().solved ? 'Bölüm çözüldü. Menüden sonraki bölüme ya da başka bir döneme geçebilirsin.'
       : (st().clues.length >= total() ? 'Bütün ipuçları tamam. Defteri aç ve vakayı çöz.' : 'Zemine dokun: yürü. Kişiye dokun: konuş. Oka dokun: öteki odaya geç.');
   }
   function hud(){
@@ -652,36 +959,48 @@ a{color:var(--accent)}
   }
   $('opts').addEventListener('click', function(ev){
     var b = ev.target.closest('.opt'); if (!b) return;
-    if (+b.dataset.i === E().ans){ st().solved = true; save(); $('solve').hidden = true; hud(); hint(); showEnd(); }
+    if (+b.dataset.i === E().ans){ st().solved = true; ES().max = Math.min(ERA().chapters.length-1, Math.max(ES().max, ES().ch+1)); save(); $('solve').hidden = true; hud(); hint(); showEnd(); }
     else { b.classList.add('bad'); b.disabled = true; $('solveW').textContent = 'Bu, ipuçlarıyla uyuşmuyor. Defterine tekrar bak.'; }
   });
-  function nextEra(){ for (var i=0;i<ORDER.length;i++){ if (!P.eras[ORDER[i]].solved) return ORDER[i]; } return null; }
+  function nextEra(){ for (var i=0;i<ORDER.length;i++){ if (!eraSolved(ORDER[i])) return ORDER[i]; } return null; }
   function showEnd(){
-    var e = E(), nx = nextEra();
+    var e = E(), s = ES(), n = ERA().chapters.length, go = $('endGo');
     $('endT').textContent = e.title; $('endX').textContent = e.end;
     $('endR').innerHTML = cite(e.real); $('endF').textContent = e.fic;
-    $('endGo').textContent = nx ? 'Sıradaki dönem: '+ERAS[nx].name : 'Dönemleri ve kaynakları gör';
-    $('endGo').dataset.to = nx || '';
+    if (s.ch < n-1){ go.textContent = 'Sonraki bölüm: '+ERA().chapters[s.ch+1].title; go.dataset.to = 'ch'; }
+    else { var nx = nextEra(); go.textContent = nx ? 'Sıradaki dönem: '+ERAS[nx].name : 'Dönemleri ve kaynakları gör'; go.dataset.to = nx || ''; }
     $('end').hidden = false;
   }
-  $('endGo').addEventListener('click', function(){ $('end').hidden = true; var to = this.dataset.to; if (to) loadEra(to); else openMenu(); });
+  $('endGo').addEventListener('click', function(){
+    $('end').hidden = true;
+    var to = this.dataset.to;
+    if (to==='ch'){ var s = ES(); s.ch++; s.max = Math.max(s.max, s.ch); loadEra(P.era); }
+    else if (to) loadEra(to); else openMenu();
+  });
   $('endStay').addEventListener('click', function(){ $('end').hidden = true; });
 
   /* ---------- menu: eras, sources, photo credits ---------- */
   function openMenu(){
     $('eras').innerHTML = ORDER.map(function(id){
-      var e = ERAS[id], s = P.eras[id], n = Object.keys(e.clues).length;
-      var status = s.solved ? 'Çözüldü' : (s.clues.length ? s.clues.length+'/'+n+' ipucu' : 'Başlanmadı');
-      return '<button type="button" class="era" data-id="'+id+'" aria-pressed="'+(id===P.era)+'"><span><strong>'+e.name+'</strong><small>'+e.title+' · '+status+'</small></span><span class="sw">'+e.sw.map(function(c){ return '<i style="background:'+c+'"></i>'; }).join('')+'</span></button>';
+      var e = ERAS[id], s = P.eras[id], n = e.chapters.length, done = s.chs.filter(function(c){ return c.solved; }).length;
+      var status = done>=n ? 'Tamamlandı' : (n>1 ? done+'/'+n+' bölüm çözüldü' : (s.chs[0].clues.length ? s.chs[0].clues.length+' ipucu bulundu' : 'Başlanmadı'));
+      return '<button type="button" class="era" data-id="'+id+'" aria-pressed="'+(id===P.era)+'"><span><strong>'+e.name+'</strong><small>'+(n>1 ? n+' bölüm' : e.chapters[0].title)+' · '+status+'</small></span><span class="sw">'+e.sw.map(function(c){ return '<i style="background:'+c+'"></i>'; }).join('')+'</span></button>';
     }).join('');
-    $('srcs').innerHTML = SOURCES.map(function(s){ return '<li><a href="'+s[1]+'" target="_blank" rel="noopener">'+s[0]+'</a></li>'; }).join('');
+    var ch = ERA().chapters, s = ES();
+    $('chT').hidden = $('chs').hidden = ch.length < 2;
+    $('chs').innerHTML = ch.map(function(c, i){
+      var open = i <= s.max, mark = s.chs[i].solved ? ' · çözüldü' : (i===s.ch ? ' · buradasın' : (open ? '' : ' · kilitli'));
+      return '<button type="button" class="opt" data-ch="'+i+'"'+(open ? '' : ' disabled')+'>'+(i+1)+'. '+c.title+'<small style="color:var(--ink2);font-weight:500">'+mark+'</small></button>';
+    }).join('');
+    $('srcs').innerHTML = SOURCES.map(function(q){ return '<li><a href="'+q[1]+'" target="_blank" rel="noopener">'+q[0]+'</a></li>'; }).join('');
     var ph = '';
-    ORDER.forEach(function(id){ var rs = ERAS[id].rooms, k; for (k in rs){ var p = rs[k].photo; if (p) ph += '<li>'+rs[k].name+': <a href="'+COMMONS+'File:'+encodeURIComponent(p.file)+'" target="_blank" rel="noopener">'+p.by+'</a>, '+p.lic+'</li>'; } });
+    ORDER.forEach(function(id){ ERAS[id].chapters.forEach(function(c){ var k; for (k in c.rooms){ var p = c.rooms[k].photo; if (p) ph += '<li>'+c.rooms[k].name+': <a href="'+COMMONS+'File:'+encodeURIComponent(p.file)+'" target="_blank" rel="noopener">'+p.by+'</a>, '+p.lic+'</li>'; } }); });
     $('photos').innerHTML = ph;
     $('menu').hidden = false;
   }
+  $('chs').addEventListener('click', function(ev){ var b = ev.target.closest('.opt'); if (b && !b.disabled){ ES().ch = +b.dataset.ch; $('menu').hidden = true; loadEra(P.era); } });
   $('eras').addEventListener('click', function(ev){ var b = ev.target.closest('.era'); if (b){ $('menu').hidden = true; loadEra(b.dataset.id); } });
-  $('restart').addEventListener('click', function(){ P.eras[P.era] = blank(); save(); $('menu').hidden = true; loadEra(P.era); });
+  $('restart').addEventListener('click', function(){ ES().chs[ES().ch] = blank(); save(); $('menu').hidden = true; loadEra(P.era); });
 
   function loadEra(id){
     P.era = id;
@@ -690,7 +1009,7 @@ a{color:var(--accent)}
     if (!st().room || !e.rooms[st().room]) st().room = e.first;
     save();
     if (id==='osmanli') delete document.body.dataset.era; else document.body.dataset.era = id;
-    $('place').textContent = e.place; $('caseT').textContent = e.title;
+    var nch = ERA().chapters.length; $('place').textContent = e.place+(nch>1 ? ' · Bölüm '+(ES().ch+1)+'/'+nch : ''); $('caseT').textContent = e.title;
     pos = [50,116];
     buildScene(); hud(); hint();
     if (!st().seen){
