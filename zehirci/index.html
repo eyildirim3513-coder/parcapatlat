@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Zehirci"><meta name="theme-color" content="#1a0a34"><meta name="build" content="1794940070">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Zehirci"><meta name="theme-color" content="#1a0a34"><meta name="build" content="1794941122">
 <title>Zehirci</title>
 <style>
 :root{--ink:#eef3ff;--mut:#a79fc9;--acc:#7dff4f;--acc2:#b56bff;--hot:#ff4d8d;--card:rgba(34,20,66,.72);--line:rgba(125,255,79,.2)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 [hidden]{display:none!important}
-html,body{margin:0;height:100%;overflow:hidden;background:#0a0418;color:var(--ink);color-scheme:dark;font:700 15px ui-rounded,"SF Pro Rounded","Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{touch-action:manipulation;-webkit-touch-callout:none;margin:0;height:100%;overflow:hidden;background:#0a0418;color:var(--ink);color-scheme:dark;font:700 15px ui-rounded,"SF Pro Rounded","Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 body{background:radial-gradient(120% 60% at 80% -10%,rgba(125,255,79,.18),transparent 60%),radial-gradient(90% 50% at 0% 100%,rgba(181,107,255,.22),transparent 60%),#0a0418}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
 svg{display:block}.ic{width:20px;height:20px;display:inline-block;vertical-align:middle;flex:none}
@@ -53,6 +53,9 @@ svg{display:block}.ic{width:20px;height:20px;display:inline-block;vertical-align
 .pips{display:flex;gap:4px}.pips i{width:16px;height:6px;border-radius:4px;background:rgba(255,255,255,.18)}.pips i.on{background:var(--acc)}
 .up{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center}.up h4{margin:0;font-size:14px}.up p{grid-column:1/2}
 
+
+#hunt.land .wrow{top:max(8px,env(safe-area-inset-top));bottom:auto;left:auto;right:46px;justify-content:flex-end}#hunt.land .wc{width:46px;height:46px}#hunt.land .wc svg{width:26px;height:26px}
+#hunt.land .ctl button{width:62px;height:62px}#hunt.land .ctl.cr button{width:74px;height:74px}#hunt.land .hearts{top:calc(max(8px,env(safe-area-inset-top)) + 46px)}
 .hearts{position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 50px);left:12px;display:flex;gap:4px;pointer-events:none}.hearts svg{width:25px;height:25px;fill:#ff4d6d;filter:drop-shadow(0 1px 0 rgba(0,0,0,.7))}.hearts svg.off{fill:rgba(255,255,255,.16)}.hearts.hit{animation:hb .4s}@keyframes hb{50%{transform:scale(1.25)}}
 .hp.full{border-color:#ff4d6d}.hp.full b{color:#ff8fa5}
 .ur{display:grid;grid-template-columns:1fr auto;gap:3px 10px;align-items:center;padding:11px 2px;border-top:1px solid rgba(255,255,255,.07)}.ur:first-of-type{border-top:0}
@@ -392,7 +395,7 @@ function spawnZ(t){const Z=ZT[t];const x=t==='boss'?LW-240:rnd(560,LW-300);
  const z={t,x,dir:Math.random()<.5?-1:1,st:'walk',hp:t==='boss'?HT.bossHp:Z.hp,poison:0,stun:0,an:Math.random()*6,tm:rnd(.5,3),wd:0,alt:Z.fly?rnd(110,170):0,r:Z.r,sp:Z.spd*[.75,1,1.2,1.4][HT.mi]*(t==='boss'?1:1),spot:null,rise:0,ph:Math.random()*6,life:0,fled:false};
  if(t==='hide'){z.spot={x,k:pick(HT.M.spots)};HT.spots.push(z.spot);z.st='hidden'}
  HT.zs.push(z)}
-function resizeHunt(){hc=$('hc');const cw=innerWidth,ch=innerHeight;DPR=Math.min(2,devicePixelRatio||1);K=Math.min(cw/360,ch/300);VW=cw/K;VH=ch/K;GY=Math.round(VH*.72);hc.width=Math.round(cw*DPR);hc.height=Math.round(ch*DPR);hg=hc.getContext('2d')}
+function resizeHunt(){hc=$('hc');const cw=innerWidth,ch=innerHeight;DPR=Math.min(2,devicePixelRatio||1);K=Math.min(cw/360,ch/300);VW=cw/K;VH=ch/K;const land=cw>ch*1.15||ch<430;$('hunt').classList.toggle('land',land);GY=Math.round(VH*(land?.8:.72));hc.width=Math.round(cw*DPR);hc.height=Math.round(ch*DPR);hg=hc.getContext('2d')}
 function buildWeap(){const r=$('wrow');r.innerHTML='';WEAP.forEach(w=>{const b=document.createElement('button');b.className='wc'+(HT&&HT.sel===w.id?' on':'');b.dataset.w=w.id;const n=w.id==='harp'?'∞':S.ammo[w.id];b.innerHTML='<svg><use href="#i-'+(w.id==='harp'?'harp':w.id)+'"/></svg><i class="'+(n===0?'z':'')+'">'+n+'</i>';b.onclick=()=>selWeap(w.id);r.appendChild(b)})}
 function selWeap(id){if(!HT||HT.over)return;if(id!=='harp'&&S.ammo[id]<=0){toast(WEAP.find(w=>w.id===id).n+' yok. Laboratuvarda üret!');sfx('err');return}HT.sel=id;buildWeap()}
 function updHud(){if(!HT)return;{const P=HT.p;let h='';for(let i=0;i<hpMax();i++)h+='<svg viewBox="0 0 24 24" class="'+(i<P.hp?'':'off')+'"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg>';$('hHearts').innerHTML=h;$('hCargo').parentElement.classList.toggle('full',HT.cargo.length>=cargoCap())}
@@ -403,7 +406,8 @@ function ftxt(x,y,s,c){HT.texts.push({x,y,s,c:c||'#fff',t:0})}
 function say(s,t,id){if(!HT)return;if(HT.say&&HT.say.id==='full'&&HT.say.t>0&&id!=='full')return;HT.say={s,t:t||2.2,max:t||2.2,id}}
 function hurtP(z){const P=HT.p,dmg=z.t==='boss'?2:1;P.hp=Math.max(0,P.hp-dmg);P.inv=[1.9,1.6,1.4,1.2][HT.mi];HT.hurt=.6;HT.shake=10;const s=P.x>=z.x?1:-1;P.x=cl(P.x+s*55,30,LW-30);P.va=Math.max(P.va,150);z.x=cl(z.x-s*22,60,LW-60);z.stun=.4;burst(P.x,GY-P.a-30,'#ff4d6d',14,200);ftxt(P.x,GY-P.a-84,'-'+dmg,'#ff4d6d');sfx('hurt');vib(90);const hb=$('hHearts');hb.classList.add('hit');setTimeout(()=>hb.classList.remove('hit'),400);if(P.hp>0)say(pick(['Ahh!','Yandım!','Isırdı beni!']),1.2,'hurt');updHud();if(P.hp<=0){say('Bayıldım...',2,'ko');setTimeout(()=>{if(HT&&!HT.over)endHunt(true)},700)}}
 function gunPos(){const P=HT.p;return{x:P.x+P.face*6,y:GY-P.a-31}}
-function fireAt(wx,wy){if(!HT||HT.over)return;const P=HT.p,go=gunPos();let dx=wx-go.x,dy=wy-go.y,L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;
+function aimAt(wx,wy){let best=null,bd=1e9;for(const z of HT.zs){if(z.st==='hidden'||z.st==='reel'||z.st==='back'||(z.st==='emerge'&&z.rise<.7))continue;const c=zc(z),dd=Math.hypot(wx-c.x,(wy-c.y)*.8);if(dd<z.r+80&&dd<bd){bd=dd;best=c}}return best?[best.x,best.y]:[wx,Math.min(wy,GY-18)]}
+function fireAt(wx,wy){if(!HT||HT.over)return;const P=HT.p,go=gunPos();if(HT.sel==='harp'||HT.sel==='dart'){const a=aimAt(wx,wy);wx=a[0];wy=a[1]}let dx=wx-go.x,dy=wy-go.y,L=Math.hypot(dx,dy)||1;dx/=L;dy/=L;
  if(Math.abs(dx)>.15)P.face=dx>0?1:-1;
  const w=HT.sel;
  if(w==='harp'){if(HT.harp||HT.cd>0)return;if(HT.cargo.length>=cargoCap()){say('Çantam dolu!\nÜsse dönmeliyim.',3,'full');sfx('err');return}
@@ -464,7 +468,7 @@ function update(dt){const P=HT.p;
  const hp=HT.harp,go=gunPos();
  if(hp){if(hp.z){const z=hp.z,c=zc(z),dx=go.x-c.x,dy=go.y-(GY-z.alt-22*ZT[z.t].s),L=Math.hypot(dx,dy);const v=900*dt;z.st='reel';if(L<=v+16){z.x=go.x;z.alt=Math.max(0,GY-go.y-22*ZT[z.t].s);bank(z,hp.perfect);HT.harp=null}else{z.x+=dx/L*v;z.alt+=-dy/L*v;hp.x=z.x;hp.y=GY-z.alt-22*ZT[z.t].s}}
   else if(!hp.ret){const st=640*dt;let steps=Math.ceil(st/6);for(let i=0;i<steps&&!hp.ret&&!hp.z;i++){hp.x+=hp.dx*st/steps;hp.y+=hp.dy*st/steps;hp.tr+=st/steps;
-    for(const z of HT.zs){if(z.st==='hidden'||z.st==='reel'||(z.st==='emerge'&&z.rise<.7))continue;const c=zc(z),dist=Math.hypot(hp.x-c.x,hp.y-c.y);if(dist<z.r+3){harpHit(z,dist,hp);break}}
+    for(const z of HT.zs){if(z.st==='hidden'||z.st==='reel'||(z.st==='emerge'&&z.rise<.7))continue;const c=zc(z),dist=Math.hypot(hp.x-c.x,hp.y-c.y);if(dist<z.r+10){harpHit(z,dist,hp);break}}
     if(hp.tr>=hp.max||hp.y>GY)hp.ret=true}}
   else{const dx=go.x-hp.x,dy=go.y-hp.y,L=Math.hypot(dx,dy),v=1000*dt;if(L<v+10)HT.harp=null;else{hp.x+=dx/L*v;hp.y+=dy/L*v}}}
  // darts & bombs
@@ -712,7 +716,7 @@ let lastT=0,tickAcc=0;
 function frame(t){requestAnimationFrame(frame);const dt=Math.min(.05,(t-(lastT||t))/1000);lastT=t;
  if(HT&&!HT.over){update(dt);if(HT&&!HT.over)drawHunt()}
  else if(!HT){tickAcc+=dt;if(tickAcc>.5){tickAcc=0;tickLab()}const hc2=document.getElementById('hero');if(hc2&&cur==='base'){const g=hc2.getContext('2d'),M=MAPS[0];g.clearRect(0,0,168,168);skyG(g,M,168,168);const o=M.orb;g.fillStyle=o.c;g.shadowColor=o.c;g.shadowBlur=22;g.beginPath();g.arc(124,34,15,0,7);g.fill();g.shadowBlur=0;g.save();g.scale(.36,.36);g.drawImage(tile(M,0),-40,168/.36-282+10,520,280);g.drawImage(tile(M,1),-120,168/.36-282+44,520,280);g.restore();const gg=g.createLinearGradient(0,132,0,168);gg.addColorStop(0,M.gr[1]);gg.addColorStop(1,M.gr[2]);g.fillStyle=gg;g.fillRect(0,132,168,36);g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(70,141,26,6,0,0,7);g.fill();g.save();g.translate(70,140+Math.sin(t/500)*1.2);g.scale(1.9,1.9);drawHunter(g,0,0,{dir:1,aim:-.2,an:t/400,loaded:true});g.restore();g.save();g.translate(134,142);g.scale(-1,1);g.scale(1.25,1.25);drawZombie(g,'walk',0,0,{dir:1,an:t/300});g.restore();const vg=g.createRadialGradient(84,84,50,84,84,120);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.4)');g.fillStyle=vg;g.fillRect(0,0,168,168)}}}
-addEventListener('resize',()=>{if(HT)resizeHunt()});
+addEventListener('resize',()=>{if(HT)resizeHunt()});addEventListener('orientationchange',()=>setTimeout(()=>{if(HT)resizeHunt()},250));['gesturestart','gesturechange'].forEach(t=>document.addEventListener(t,e=>e.preventDefault()));
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save(1);lastT=0});addEventListener('pagehide',()=>save(1));addEventListener('beforeunload',()=>save(1));setInterval(()=>save(1),5000);
 if(S.pend&&S.pend.length){const cap=cageCap();let n=0,sold=0;S.pend.forEach(it=>{if(S.cages.length<cap){S.cages.push(it);n++}else sold+=ZT[it.t].coin*2});S.coin+=sold;S.pend=[];save(1);setTimeout(()=>toast('Yarım kalan avdan '+n+' zombi kafese eklendi'+(sold?', fazlası +'+sold+' altına satıldı':'')),1500)}
 checkDay();syncLists();bindHunt();syncSw();
@@ -722,5 +726,5 @@ window.__z={S:()=>S,HT:()=>HT,startHunt,fireAt,endHunt,go,tickLab,selWeap,ZT};
 })();
 </script>
 
-<script>try{if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");fetch("index.html?_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{var m=t.match(/name="build" content="(\d+)"/);if(m&&m[1]!=="1794940070"&&!sessionStorage.zr){sessionStorage.zr=1;location.replace(location.pathname+"?v="+m[1])}}).catch(()=>{})}catch(e){}</script>
+<script>try{if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");fetch("index.html?_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{var m=t.match(/name="build" content="(\d+)"/);if(m&&m[1]!=="1794941122"&&!sessionStorage.zr){sessionStorage.zr=1;location.replace(location.pathname+"?v="+m[1])}}).catch(()=>{})}catch(e){}</script>
 </body></html>

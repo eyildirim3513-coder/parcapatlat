@@ -2,13 +2,13 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Fişek">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b1230">
-<meta name="build" content="20261117-204556">
+<meta name="build" content="20261117-214428">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" type="image/png" href="icon.png">
 <style>
@@ -42,6 +42,8 @@ main{position:relative;z-index:1;height:calc(100dvh - env(safe-area-inset-top,0p
 .bb svg{width:30px;height:30px}.bb.on{border-color:var(--acc);background:rgba(255,210,63,.18);color:var(--acc)}
 .bb i{position:absolute;top:-7px;right:-4px;min-width:21px;height:21px;border-radius:999px;background:var(--hot);color:#fff;font-style:normal;font-size:12px;display:grid;place-items:center;padding:0 5px;border:2px solid #0b1230}
 .bb i.z{background:#4b5a99}
+@media (orientation:landscape) and (max-height:520px){body::before{content:'Telefonu dik tut ↺';position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#0b1230;color:#fff;font:800 20px system-ui,sans-serif}}
+html,body{touch-action:manipulation;-webkit-touch-callout:none}
 .ov{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:rgba(5,8,25,.74);z-index:20}
 .ov[hidden]{display:none!important}
 .sheet{width:min(100%,440px);max-height:90dvh;overflow:auto;background:linear-gradient(#1b2860,#121b46);border:1.5px solid var(--line);border-radius:24px;padding:16px;box-shadow:0 24px 70px #000b}
