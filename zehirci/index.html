@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Zehirci"><meta name="theme-color" content="#1a0a34"><meta name="build" content="1794941391">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Zehirci"><meta name="theme-color" content="#1a0a34"><meta name="build" content="1794941582">
 <title>Zehirci</title>
 <style>
 :root{--ink:#eef3ff;--mut:#a79fc9;--acc:#7dff4f;--acc2:#b56bff;--hot:#ff4d8d;--card:rgba(34,20,66,.72);--line:rgba(125,255,79,.2)}
@@ -61,6 +61,26 @@ svg{display:block}.ic{width:20px;height:20px;display:inline-block;vertical-align
 .ctl button.edit{border:2px dashed var(--acc);background:rgba(125,255,79,.22);animation:wob 1.2s infinite ease-in-out}@keyframes wob{50%{box-shadow:0 0 0 5px rgba(125,255,79,.25)}}
 #hEdit{position:absolute;top:30%;left:50%;transform:translateX(-50%);z-index:25;display:grid;gap:8px;justify-items:center;text-align:center;background:rgba(10,4,28,.9);border:1.5px solid var(--acc);border-radius:18px;padding:12px 16px;max-width:86vw}#hEdit p{margin:0;font-size:14px}#hEdit .r{display:flex;gap:8px}
 #ov-hset input[type=range]{width:100%;accent-color:#7dff4f;height:28px}.rg{display:grid;gap:4px;padding:8px 14px;border-radius:15px;background:rgba(255,255,255,.07)}.rg span{font-size:14px}.rg b{color:var(--acc)}
+
+@media (orientation:landscape) and (max-height:520px){
+#app{max-width:none;display:grid;grid-template-columns:calc(78px + env(safe-area-inset-left,0px)) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);height:100dvh;padding-right:env(safe-area-inset-right,0px)}
+.nav{grid-column:1;grid-row:1/3;flex-direction:column;justify-content:center;gap:8px;border-top:0;border-right:1.5px solid var(--line);padding:8px 6px 8px calc(6px + env(safe-area-inset-left,0px))}
+.nav button{flex:none;padding:10px 0}.nav i{right:22%}
+.hud{grid-column:2;grid-row:1;padding:6px 12px 2px}
+.scr{grid-column:2;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));padding:4px 12px 14px;gap:10px}
+.scr .hero,.scr>.tabs,.scr>.btn,#maps>.card:first-child,.scr>.cos{grid-column:1/-1}
+.cos{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cages{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))}
+.hero{grid-template-columns:84px 1fr}.hero .say{margin-top:2px}
+.ov{padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px))}
+.sheet{max-width:560px;max-height:96dvh;padding:12px 14px;gap:8px}
+#ov-start .sheet{max-width:640px;grid-template-columns:150px 1fr;column-gap:22px;text-align:left;justify-items:stretch;align-items:center}
+#ov-start .logo{grid-row:1/5;width:130px;height:130px;justify-self:center}#ov-start .name{margin:0;font-size:34px}#ov-start .tag{margin:0}
+#ov-hset .sheet,#ov-menu .sheet{max-width:680px;grid-template-columns:1fr 1fr}#ov-hset .sh,#ov-hset .rg,#ov-hset .btn,#ov-menu .sh{grid-column:1/-1}
+#resB{max-width:640px}
+.scr{align-items:start}#toast{top:calc(8px + env(safe-area-inset-top,0px))}.sheet .row{padding:8px 12px}#ov-hset .rg{padding:6px 12px}#ov-hset .btn{padding:9px 12px}#ov-hset .x,.sheet .x{width:32px;height:32px}
+.mp canvas{aspect-ratio:520/150;object-fit:cover}
+}
 .hearts{position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 50px);left:12px;display:flex;gap:4px;pointer-events:none}.hearts svg{width:25px;height:25px;fill:#ff4d6d;filter:drop-shadow(0 1px 0 rgba(0,0,0,.7))}.hearts svg.off{fill:rgba(255,255,255,.16)}.hearts.hit{animation:hb .4s}@keyframes hb{50%{transform:scale(1.25)}}
 .hp.full{border-color:#ff4d6d}.hp.full b{color:#ff8fa5}
 .ur{display:grid;grid-template-columns:1fr auto;gap:3px 10px;align-items:center;padding:11px 2px;border-top:1px solid rgba(255,255,255,.07)}.ur:first-of-type{border-top:0}
@@ -764,5 +784,5 @@ window.__z={S:()=>S,HT:()=>HT,startHunt,fireAt,endHunt,go,tickLab,selWeap,ZT};
 })();
 </script>
 
-<script>try{if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");fetch("index.html?_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{var m=t.match(/name="build" content="(\d+)"/);if(m&&m[1]!=="1794941391"&&!sessionStorage.zr){sessionStorage.zr=1;location.replace(location.pathname+"?v="+m[1])}}).catch(()=>{})}catch(e){}</script>
+<script>try{if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");fetch("index.html?_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{var m=t.match(/name="build" content="(\d+)"/);if(m&&m[1]!=="1794941582"&&!sessionStorage.zr){sessionStorage.zr=1;location.replace(location.pathname+"?v="+m[1])}}).catch(()=>{})}catch(e){}</script>
 </body></html>
