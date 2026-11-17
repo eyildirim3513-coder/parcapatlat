@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Zehirci"><meta name="theme-color" content="#1a0a34"><meta name="build" content="1794938830">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Zehirci"><meta name="theme-color" content="#1a0a34"><meta name="build" content="1794939308">
 <title>Zehirci</title>
 <style>
 :root{--ink:#eef3ff;--mut:#a79fc9;--acc:#7dff4f;--acc2:#b56bff;--hot:#ff4d8d;--card:rgba(34,20,66,.72);--line:rgba(125,255,79,.2)}
@@ -202,14 +202,14 @@ const REC=[
  {id:'gece',k:'e',n:'Gece Şurubu',c:{p:2,b:1,r:1},dur:32,price:230,col:'#b56bff'},
  {id:'efs',k:'e',n:'Efsane Zehir',c:{g:1,y:1,p:1,b:1,r:1},dur:50,price:450,col:'#ff5a9d'}];
 const UPS=[
- {k:'range',n:'Harpun Menzili',max:5,base:150,d:l=>(200+35*l)+' birim'},
- {k:'fire',n:'Harpun Hızı',max:5,base:180,d:l=>(0.95-0.09*l).toFixed(2)+' sn bekleme'},
+ {k:'range',n:'Harpun Menzili',max:5,base:150,d:l=>(235+35*l)+' birim'},
+ {k:'fire',n:'Harpun Hızı',max:5,base:180,d:l=>(0.8-0.07*l).toFixed(2)+' sn bekleme'},
  {k:'fuel',n:'Jetpack Yakıtı',max:5,base:140,d:l=>(100+25*l)+' yakıt'},
- {k:'cargo',n:'Taşıma Çantası',max:5,base:200,d:l=>(3+l)+' zombi'},
- {k:'cage',n:'Kafes Kapasitesi',max:5,base:160,d:l=>(6+3*l)+' kafes'},
+ {k:'cargo',n:'Taşıma Çantası',max:5,base:200,d:l=>(8+2*l)+' zombi'},
+ {k:'cage',n:'Kafes Kapasitesi',max:5,base:160,d:l=>(9+3*l)+' kafes'},
  {k:'slots',n:'Özütleyici Sayısı',max:3,base:450,d:l=>(1+l)+' makine'},
  {k:'lab',n:'Laboratuvar Hızı',max:5,base:260,d:l=>'%'+Math.round(100/(1-0.12*l))+' hız'},
- {k:'time',n:'Av Süresi',max:4,base:240,d:l=>(120+20*l)+' sn'},
+ {k:'time',n:'Av Süresi',max:4,base:240,d:l=>(150+20*l)+' sn'},
  {k:'drone',n:'Drone Filosu',max:3,base:600,d:l=>l+' drone'}];
 const COS=[
  {id:'klasik',n:'Klasik',p:0,suit:'#2f8f4e',hood:'#1d6a37',lens:'#a8fff3',trim:'#7dff4f'},
@@ -218,22 +218,22 @@ const COS=[
  {id:'korsan',n:'Korsan',p:1200,suit:'#6b4428',hood:'#c0392b',lens:'#ffe39a',trim:'#e8c06a',patch:1},
  {id:'astro',n:'Astronot',p:2000,suit:'#e9ecf5',hood:'#c4cad9',lens:'#7fd6ff',trim:'#ff7a3d',helmet:1}];
 const MAPS=[
- {n:'Çürük Bataklık',d:'Çamur, sis ve saklanan zombiler.',style:'swamp',sky:['#17232f','#52805c'],far:'#2a4a40',mid:'#17332a',gr:['#4a6a34','#2c3d24','#1a2616'],fog:'rgba(150,220,160,.16)',orb:{x:.74,y:.22,c:'#eaf8cc',r:26},spots:['bush','stump'],quota:5,spawn:{walk:6,run:2,hide:4},bossN:'Çamur Kral',bossC:'#5f8f4a',seed:3},
- {n:'Terk Edilmiş Liman',d:'Paslı konteynerler arasında Devler.',style:'port',sky:['#0a1430','#2e5288'],far:'#17294a',mid:'#0e1932',gr:['#586674','#34404c','#1c232c'],fog:'rgba(140,180,255,.14)',orb:{x:.26,y:.2,c:'#dce8ff',r:22},spots:['barrel','crate'],quota:7,spawn:{walk:5,run:3,hide:4,fat:2},bossN:'Konteyner Canavarı',bossC:'#6a7fa6',seed:5},
- {n:'Neon Şehir',d:'Çatılarda uçanlar, zırhlı hortlaklar.',style:'city',sky:['#180636','#80307f'],far:'#2e1250',mid:'#1b0b33',gr:['#443e5c','#2a2640','#17142b'],fog:'rgba(255,100,220,.13)',orb:{x:.8,y:.26,c:'#ffd6f7',r:20},spots:['hole','bin'],quota:9,spawn:{walk:4,run:3,hide:3,fat:2,fly:3,arm:2},bossN:'Neon Hortlak',bossC:'#b04aa8',seed:7},
- {n:'Kızıl Çöl',d:'Her tür zombi, en zehirli av.',style:'desert',sky:['#561810','#e5842c'],far:'#8f3d1d',mid:'#5c2613',gr:['#cf9148','#9d6732','#6a4421'],fog:'rgba(255,170,90,.16)',orb:{x:.6,y:.3,c:'#fff0b0',r:34},spots:['cactus','rock'],quota:11,spawn:{walk:5,run:4,hide:4,fat:3,fly:3,arm:3},bossN:'Kum Devi',bossC:'#c07a3a',seed:9}];
+ {n:'Çürük Bataklık',d:'Çamur, sis ve saklanan zombiler.',style:'swamp',sky:['#17232f','#52805c'],far:'#2a4a40',mid:'#17332a',gr:['#4a6a34','#2c3d24','#1a2616'],fog:'rgba(150,220,160,.16)',orb:{x:.74,y:.22,c:'#eaf8cc',r:26},spots:['bush','stump'],quota:4,spawn:{walk:7,run:2,hide:4},bossN:'Çamur Kral',bossC:'#5f8f4a',seed:3},
+ {n:'Terk Edilmiş Liman',d:'Paslı konteynerler arasında Devler.',style:'port',sky:['#0a1430','#2e5288'],far:'#17294a',mid:'#0e1932',gr:['#586674','#34404c','#1c232c'],fog:'rgba(140,180,255,.14)',orb:{x:.26,y:.2,c:'#dce8ff',r:22},spots:['barrel','crate'],quota:8,spawn:{walk:5,run:3,hide:4,fat:2},bossN:'Konteyner Canavarı',bossC:'#6a7fa6',seed:5},
+ {n:'Neon Şehir',d:'Çatılarda uçanlar, zırhlı hortlaklar.',style:'city',sky:['#180636','#80307f'],far:'#2e1250',mid:'#1b0b33',gr:['#443e5c','#2a2640','#17142b'],fog:'rgba(255,100,220,.13)',orb:{x:.8,y:.26,c:'#ffd6f7',r:20},spots:['hole','bin'],quota:12,spawn:{walk:4,run:3,hide:3,fat:2,fly:3,arm:2},bossN:'Neon Hortlak',bossC:'#b04aa8',seed:7},
+ {n:'Kızıl Çöl',d:'Her tür zombi, en zehirli av.',style:'desert',sky:['#561810','#e5842c'],far:'#8f3d1d',mid:'#5c2613',gr:['#cf9148','#9d6732','#6a4421'],fog:'rgba(255,170,90,.16)',orb:{x:.6,y:.3,c:'#fff0b0',r:34},spots:['cactus','rock'],quota:16,spawn:{walk:5,run:4,hide:4,fat:3,fly:3,arm:3},bossN:'Kum Devi',bossC:'#c07a3a',seed:9}];
 const RANKS=[['Çaylak',0],['Takipçi',40],['Avcı',110],['Usta Avcı',240],['Zehirci',450],['Karanlık Avcı',800],['Efsane',1300],['Bataklık Efendisi',2000]];
 const STREAK=n=>({coin:60*Math.min(n,7),plut:(n===3||n===7||n%10===0)?1:0});
 /* ---------- state ---------- */
-const DEF=()=>({v:1,coin:250,plut:3,xp:0,tox:{g:0,y:0,p:0,b:0,r:0},cages:[],ammo:{dart:2,bomb:1,bait:2,trap:2},elix:{},
+const DEF=()=>({v:1,coin:400,plut:3,xp:0,tox:{g:0,y:0,p:0,b:0,r:0},cages:[],ammo:{dart:2,bomb:1,bait:2,trap:2},elix:{},
  up:{range:0,fire:0,fuel:0,cargo:0,cage:0,slots:0,lab:0,time:0,drone:0},ext:[],brew:{id:null,s:0,d:0},drones:[],
  maps:{unlocked:1,stars:[0,0,0,0],boss:[0,0,0,0]},own:{cos:['klasik']},sel:{cos:'klasik'},orders:[],dem:{},demD:'',
  daily:{d:'',catch:0,perfect:0,brew:0,cl:[0,0,0]},st:{n:0,last:''},sound:true,vib:true,tut:0,stats:{caught:0,perfect:0,bosses:0,brews:0}});
 let S=DEF();
 (function load(){try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r&&r.v===1){const d=DEF();const mg=(a,b)=>{for(const k in b){if(b[k]&&typeof b[k]==='object'&&!Array.isArray(b[k])&&a[k]&&typeof a[k]==='object'&&!Array.isArray(a[k]))mg(a[k],b[k]);else a[k]=b[k]}return a};S=mg(d,r)}}catch(e){}})();
 let saveT=0;function save(now){if(now){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}return}clearTimeout(saveT);saveT=setTimeout(()=>save(1),250)}
-const rangeV=()=>200+35*S.up.range,fireCd=()=>0.95-0.09*S.up.fire,fuelMax=()=>100+25*S.up.fuel,cargoCap=()=>3+S.up.cargo,cageCap=()=>6+3*S.up.cage,extSlots=()=>1+S.up.slots,labF=()=>1-0.12*S.up.lab,huntTime=()=>120+20*S.up.time;
-const upCost=(u,l)=>Math.round(u.base*Math.pow(1.7,l)/10)*10;
+const rangeV=()=>235+35*S.up.range,fireCd=()=>0.8-0.07*S.up.fire,fuelMax=()=>100+25*S.up.fuel,cargoCap=()=>8+2*S.up.cargo,cageCap=()=>9+3*S.up.cage,extSlots=()=>1+S.up.slots,labF=()=>1-0.12*S.up.lab,huntTime=()=>150+20*S.up.time;
+const upCost=(u,l)=>Math.round(u.base*Math.pow(1.95,l)/10)*10;
 function rankInfo(){let i=0;for(let k=0;k<RANKS.length;k++)if(S.xp>=RANKS[k][1])i=k;const nx=RANKS[i+1];return{i,name:RANKS[i][0],next:nx?nx[1]:0,pct:nx?(S.xp-RANKS[i][1])/(nx[1]-RANKS[i][1])*100:100}}
 function addXp(n){const a=rankInfo().i;S.xp+=n;const b=rankInfo().i;if(b>a){S.plut+=2;setTimeout(()=>toast('Rütbe atladın: '+RANKS[b][0]+'  +2 plütonyum'),500);sfx('level')}}
 /* ---------- audio ---------- */
@@ -365,7 +365,7 @@ function startHunt(mi){
  if(!S.tut){S.tut=1;save();const tp=$('hTip');tp.hidden=false;tp.innerHTML='<b>Nasıl avlanılır?</b> ◀ ▶ ile yürü, ▲ ile uç. Zombiye dokununca harpun fırlar. Saklananlar yaklaşınca çıkar. Zırhlıyı önce zehirle!';setTimeout(()=>tp.hidden=true,9000)}else $('hTip').hidden=true;
 }
 function spawnZ(t){const Z=ZT[t];const x=t==='boss'?LW-240:rnd(320,LW-300);
- const z={t,x,dir:Math.random()<.5?-1:1,st:'walk',hp:t==='boss'?HT.bossHp:Z.hp,poison:0,stun:0,an:Math.random()*6,tm:rnd(.5,3),wd:0,alt:Z.fly?rnd(110,170):0,r:Z.r,sp:Z.spd,spot:null,rise:0,ph:Math.random()*6,life:0,fled:false};
+ const z={t,x,dir:Math.random()<.5?-1:1,st:'walk',hp:t==='boss'?HT.bossHp:Z.hp,poison:0,stun:0,an:Math.random()*6,tm:rnd(.5,3),wd:0,alt:Z.fly?rnd(110,170):0,r:Z.r,sp:Z.spd*[.75,1,1.2,1.4][HT.mi]*(t==='boss'?1:1),spot:null,rise:0,ph:Math.random()*6,life:0,fled:false};
  if(t==='hide'){z.spot={x,k:pick(HT.M.spots)};HT.spots.push(z.spot);z.st='hidden'}
  HT.zs.push(z)}
 function resizeHunt(){hc=$('hc');const cw=innerWidth,ch=innerHeight;DPR=Math.min(2,devicePixelRatio||1);K=Math.min(cw/360,ch/300);VW=cw/K;VH=ch/K;GY=Math.round(VH*.72);hc.width=Math.round(cw*DPR);hc.height=Math.round(ch*DPR);hg=hc.getContext('2d')}
@@ -657,5 +657,5 @@ window.__z={S:()=>S,HT:()=>HT,startHunt,fireAt,endHunt,go,tickLab,selWeap,ZT};
 })();
 </script>
 
-<script>try{if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");fetch("index.html?_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{var m=t.match(/name="build" content="(\d+)"/);if(m&&m[1]!=="1794938830"&&!sessionStorage.zr){sessionStorage.zr=1;location.replace(location.pathname+"?v="+m[1])}}).catch(()=>{})}catch(e){}</script>
+<script>try{if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");fetch("index.html?_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{var m=t.match(/name="build" content="(\d+)"/);if(m&&m[1]!=="1794939308"&&!sessionStorage.zr){sessionStorage.zr=1;location.replace(location.pathname+"?v="+m[1])}}).catch(()=>{})}catch(e){}</script>
 </body></html>
