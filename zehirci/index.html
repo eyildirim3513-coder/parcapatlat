@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Zehirci"><meta name="theme-color" content="#1a0a34"><meta name="build" content="1794941122">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Zehirci"><meta name="theme-color" content="#1a0a34"><meta name="build" content="1794941391">
 <title>Zehirci</title>
 <style>
 :root{--ink:#eef3ff;--mut:#a79fc9;--acc:#7dff4f;--acc2:#b56bff;--hot:#ff4d8d;--card:rgba(34,20,66,.72);--line:rgba(125,255,79,.2)}
@@ -54,8 +54,13 @@ svg{display:block}.ic{width:20px;height:20px;display:inline-block;vertical-align
 .up{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center}.up h4{margin:0;font-size:14px}.up p{grid-column:1/2}
 
 
-#hunt.land .wrow{top:max(8px,env(safe-area-inset-top));bottom:auto;left:auto;right:46px;justify-content:flex-end}#hunt.land .wc{width:46px;height:46px}#hunt.land .wc svg{width:26px;height:26px}
-#hunt.land .ctl button{width:62px;height:62px}#hunt.land .ctl.cr button{width:74px;height:74px}#hunt.land .hearts{top:calc(max(8px,env(safe-area-inset-top)) + 46px)}
+#hunt.land .wrow{top:max(8px,env(safe-area-inset-top));bottom:auto;left:auto;right:58px;justify-content:flex-end}#hunt.land .wc{width:46px;height:46px}#hunt.land .wc svg{width:26px;height:26px}
+#hunt.land .hearts{top:calc(max(8px,env(safe-area-inset-top)) + 46px)}
+
+#bU{width:calc(84px*var(--cs,1))!important;height:calc(84px*var(--cs,1))!important}#hunt.land .ctl button{width:calc(62px*var(--cs,1));height:calc(62px*var(--cs,1))}#hunt.land #bU{width:calc(74px*var(--cs,1))!important;height:calc(74px*var(--cs,1))!important}
+.ctl button.edit{border:2px dashed var(--acc);background:rgba(125,255,79,.22);animation:wob 1.2s infinite ease-in-out}@keyframes wob{50%{box-shadow:0 0 0 5px rgba(125,255,79,.25)}}
+#hEdit{position:absolute;top:30%;left:50%;transform:translateX(-50%);z-index:25;display:grid;gap:8px;justify-items:center;text-align:center;background:rgba(10,4,28,.9);border:1.5px solid var(--acc);border-radius:18px;padding:12px 16px;max-width:86vw}#hEdit p{margin:0;font-size:14px}#hEdit .r{display:flex;gap:8px}
+#ov-hset input[type=range]{width:100%;accent-color:#7dff4f;height:28px}.rg{display:grid;gap:4px;padding:8px 14px;border-radius:15px;background:rgba(255,255,255,.07)}.rg span{font-size:14px}.rg b{color:var(--acc)}
 .hearts{position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 50px);left:12px;display:flex;gap:4px;pointer-events:none}.hearts svg{width:25px;height:25px;fill:#ff4d6d;filter:drop-shadow(0 1px 0 rgba(0,0,0,.7))}.hearts svg.off{fill:rgba(255,255,255,.16)}.hearts.hit{animation:hb .4s}@keyframes hb{50%{transform:scale(1.25)}}
 .hp.full{border-color:#ff4d6d}.hp.full b{color:#ff8fa5}
 .ur{display:grid;grid-template-columns:1fr auto;gap:3px 10px;align-items:center;padding:11px 2px;border-top:1px solid rgba(255,255,255,.07)}.ur:first-of-type{border-top:0}
@@ -91,9 +96,9 @@ svg{display:block}.ic{width:20px;height:20px;display:inline-block;vertical-align
 .wrow{position:absolute;left:0;right:0;bottom:calc(max(12px,env(safe-area-inset-bottom)) + 92px);display:flex;justify-content:center;gap:8px}
 .wc{position:relative;width:52px;height:52px;border-radius:15px;background:rgba(10,4,28,.72);border:2px solid rgba(255,255,255,.22);display:grid;place-items:center}.wc svg{width:30px;height:30px}.wc.on{border-color:var(--acc);box-shadow:0 0 14px rgba(125,255,79,.55);background:rgba(40,90,30,.7)}
 .wc i{position:absolute;top:-6px;right:-5px;min-width:20px;height:20px;border-radius:999px;background:var(--hot);font-style:normal;font-size:11px;display:grid;place-items:center;padding:0 4px;border:2px solid #0a0418}.wc i.z{background:#4b4075}
-.ctl{position:absolute;bottom:max(14px,env(safe-area-inset-bottom));display:flex;gap:10px}.ctl.cl{left:12px}.ctl.cr{right:12px}
-.ctl button{width:70px;height:70px;border-radius:50%;background:rgba(10,4,28,.62);border:2px solid rgba(255,255,255,.3);display:grid;place-items:center;touch-action:none}.ctl button svg{width:34px;height:34px}.ctl button.d{background:rgba(125,255,79,.3);border-color:var(--acc)}
-.ctl.cr button{width:84px;height:84px}
+
+.ctl{display:contents}.ctl button{position:absolute;transform:translate(-50%,-50%);width:calc(70px*var(--cs,1));height:calc(70px*var(--cs,1));border-radius:50%;background:rgba(10,4,28,.62);border:2px solid rgba(255,255,255,.3);display:grid;place-items:center;touch-action:none}.ctl button svg{width:34px;height:34px}.ctl button.d{background:rgba(125,255,79,.3);border-color:var(--acc)}
+
 </style>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10.3" fill="#ffc928" stroke="#b87800" stroke-width="1.6"/><circle cx="12" cy="12" r="6.6" fill="#ffdd5c" stroke="#d49a10" stroke-width="1.4"/><path d="M7.4 8.6a6 6 0 0 1 3.6-2.4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".8"/></symbol>
@@ -149,6 +154,7 @@ svg{display:block}.ic{width:20px;height:20px;display:inline-block;vertical-align
   <div class="hp"><svg class="ic"><use href="#i-clock"/></svg><b id="hTime">2:00</b></div>
   <div class="hp"><svg class="ic"><use href="#i-quest"/></svg><b id="hQ">0/5</b></div>
   <div class="hp"><svg class="ic"><use href="#i-cargo"/></svg><b id="hCargo">0/3</b></div>
+  <button class="hb" id="hSet" aria-label="Av ayarları" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
  </div>
  <div class="hearts" id="hHearts"></div>
  <div class="fuel"><i id="hF"></i></div>
@@ -157,6 +163,7 @@ svg{display:block}.ic{width:20px;height:20px;display:inline-block;vertical-align
  <div class="ctl cl"><button id="bL"><svg><use href="#i-al"/></svg></button><button id="bR"><svg><use href="#i-ar"/></svg></button></div>
  <div class="ctl cr"><button id="bU"><svg><use href="#i-up"/></svg></button></div>
 </div>
+<div id="hEdit" hidden><p><b>Tuşları parmağınla sürükle</b><br>İstediğin yere bırak, kendiliğinden kaydolur.</p><div class="r"><button class="btn sm" id="hEditOk">Bitti</button><button class="btn sm alt" id="hEditRs">Sıfırla</button></div></div>
 <div id="toast"></div>
 
 <div class="ov" id="ov-start" hidden><div class="sheet big">
@@ -172,6 +179,16 @@ svg{display:block}.ic{width:20px;height:20px;display:inline-block;vertical-align
  <button class="row" id="tgSound"><svg><use href="#i-sound"/></svg><span>Ses</span><i class="sw"></i></button>
  <button class="row" id="tgVib"><svg><use href="#i-vib"/></svg><span>Titreşim</span><i class="sw"></i></button>
  <button class="row" id="mReset"><svg><use href="#i-trash"/></svg><span>Verileri Sıfırla</span></button>
+</div></div>
+<div class="ov" id="ov-hset" hidden><div class="sheet">
+ <div class="sh"><h2>Av Ayarları</h2><button class="x" data-close><svg><use href="#i-close"/></svg></button></div>
+ <button class="row" id="hMove"><svg><use href="#i-up"/></svg><span>Tuşları Sürükleyerek Taşı</span></button>
+ <div class="rg"><span>Tuş boyutu: <b id="csv">100%</b></span><input type="range" id="csr" min="70" max="140" step="5" value="100"></div>
+ <button class="row" id="hMirror"><svg><use href="#i-ar"/></svg><span>Düzeni Karşıya Çevir (Sol/Sağ el)</span></button>
+ <button class="row" id="hReset"><svg><use href="#i-trash"/></svg><span>Varsayılan Yerleşim</span></button>
+ <button class="row" id="hSnd"><svg><use href="#i-sound"/></svg><span>Ses</span><i class="sw"></i></button>
+ <button class="row" id="hVib"><svg><use href="#i-vib"/></svg><span>Titreşim</span><i class="sw"></i></button>
+ <button class="btn" data-close>Devam Et</button>
 </div></div>
 <div class="ov" id="ov-help" hidden><div class="sheet">
  <div class="sh"><h2>Nasıl Oynanır</h2><button class="x" data-close><svg><use href="#i-close"/></svg></button></div>
@@ -244,7 +261,7 @@ const STREAK=n=>({coin:60*Math.min(n,7),plut:(n===3||n===7||n%10===0)?1:0});
 const DEF=()=>({v:1,coin:400,plut:3,xp:0,tox:{g:0,y:0,p:0,b:0,r:0},cages:[],ammo:{dart:2,bomb:1,bait:2,trap:2},elix:{},
  up:{hp:0,range:0,fire:0,fuel:0,cargo:0,cage:0,slots:0,lab:0,time:0,drone:0},ext:[],brew:{id:null,s:0,d:0},drones:[],
  maps:{unlocked:1,stars:[0,0,0,0],boss:[0,0,0,0]},own:{cos:['klasik']},sel:{cos:'klasik'},orders:[],dem:{},demD:'',
- daily:{d:'',catch:0,perfect:0,brew:0,cl:[0,0,0]},st:{n:0,last:''},sound:true,vib:true,pend:[],tut:0,stats:{caught:0,perfect:0,bosses:0,brews:0}});
+ daily:{d:'',catch:0,perfect:0,brew:0,cl:[0,0,0]},st:{n:0,last:''},sound:true,vib:true,pend:[],ctl:{size:1},tut:0,stats:{caught:0,perfect:0,bosses:0,brews:0}});
 let S=DEF();
 (function load(){for(const k of [KEY,KEY+'-b']){try{const r=JSON.parse(localStorage.getItem(k)||'null');if(r&&r.v===1){const d=DEF();const mg=(a,b)=>{for(const k in b){if(b[k]&&typeof b[k]==='object'&&!Array.isArray(b[k])&&a[k]&&typeof a[k]==='object'&&!Array.isArray(a[k]))mg(a[k],b[k]);else a[k]=b[k]}return a};S=mg(d,r);return}}catch(e){}}})();
 let saveT=0,saveFail=0;function save(now){if(now){try{const j=JSON.stringify(S);localStorage.setItem(KEY,j);localStorage.setItem(KEY+'-b',j)}catch(e){if(!saveFail){saveFail=1;setTimeout(()=>toast('Tarayıcı kaydı engelliyor, ilerleme saklanamıyor'),400)}}return}clearTimeout(saveT);saveT=setTimeout(()=>save(1),120)}
@@ -395,7 +412,7 @@ function spawnZ(t){const Z=ZT[t];const x=t==='boss'?LW-240:rnd(560,LW-300);
  const z={t,x,dir:Math.random()<.5?-1:1,st:'walk',hp:t==='boss'?HT.bossHp:Z.hp,poison:0,stun:0,an:Math.random()*6,tm:rnd(.5,3),wd:0,alt:Z.fly?rnd(110,170):0,r:Z.r,sp:Z.spd*[.75,1,1.2,1.4][HT.mi]*(t==='boss'?1:1),spot:null,rise:0,ph:Math.random()*6,life:0,fled:false};
  if(t==='hide'){z.spot={x,k:pick(HT.M.spots)};HT.spots.push(z.spot);z.st='hidden'}
  HT.zs.push(z)}
-function resizeHunt(){hc=$('hc');const cw=innerWidth,ch=innerHeight;DPR=Math.min(2,devicePixelRatio||1);K=Math.min(cw/360,ch/300);VW=cw/K;VH=ch/K;const land=cw>ch*1.15||ch<430;$('hunt').classList.toggle('land',land);GY=Math.round(VH*(land?.8:.72));hc.width=Math.round(cw*DPR);hc.height=Math.round(ch*DPR);hg=hc.getContext('2d')}
+function resizeHunt(){hc=$('hc');const cw=innerWidth,ch=innerHeight;DPR=Math.min(2,devicePixelRatio||1);K=Math.min(cw/360,ch/300);VW=cw/K;VH=ch/K;const land=cw>ch*1.15||ch<430;$('hunt').classList.toggle('land',land);GY=Math.round(VH*(land?.8:.72));hc.width=Math.round(cw*DPR);hc.height=Math.round(ch*DPR);hg=hc.getContext('2d');applyCtl()}
 function buildWeap(){const r=$('wrow');r.innerHTML='';WEAP.forEach(w=>{const b=document.createElement('button');b.className='wc'+(HT&&HT.sel===w.id?' on':'');b.dataset.w=w.id;const n=w.id==='harp'?'∞':S.ammo[w.id];b.innerHTML='<svg><use href="#i-'+(w.id==='harp'?'harp':w.id)+'"/></svg><i class="'+(n===0?'z':'')+'">'+n+'</i>';b.onclick=()=>selWeap(w.id);r.appendChild(b)})}
 function selWeap(id){if(!HT||HT.over)return;if(id!=='harp'&&S.ammo[id]<=0){toast(WEAP.find(w=>w.id===id).n+' yok. Laboratuvarda üret!');sfx('err');return}HT.sel=id;buildWeap()}
 function updHud(){if(!HT)return;{const P=HT.p;let h='';for(let i=0;i<hpMax();i++)h+='<svg viewBox="0 0 24 24" class="'+(i<P.hp?'':'off')+'"><path d="M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z"/></svg>';$('hHearts').innerHTML=h;$('hCargo').parentElement.classList.toggle('full',HT.cargo.length>=cargoCap())}
@@ -453,7 +470,7 @@ function bank(z,perfect,how){const Z=ZT[z.t],P=HT.p;HT.cargo.push({t:z.t,p:z.poi
 function pop(){updTop()}
 function hitZ(z,by,perfect){
  return}
-function update(dt){const P=HT.p;
+function update(dt){const P=HT.p;if(HT.paused)return;
  HT.t-=dt;if(HT.t<=0){HT.t=0;endHunt();return}
  HT.cd=Math.max(0,HT.cd-dt);HT.vt-=dt;HT.fe-=dt;if(P.inv>0)P.inv-=dt;if(HT.hurt>0)HT.hurt-=dt;if(HT.say){HT.say.t-=dt;if(HT.say.t<=0)HT.say=null}
  if(HT.t<15&&!HT.low){HT.low=1;say('Zaman daralıyor!',2.2,'time')}
@@ -561,10 +578,31 @@ function drawHunt(){const g=hg,P=HT.p,M=HT.M;
  if(HT.hurt>0){g.fillStyle='rgba(255,20,60,'+Math.min(.45,HT.hurt*.7)+')';g.fillRect(0,0,VW,VH)}
  if(HT.t<15){g.fillStyle='rgba(255,40,70,'+(.08+.06*Math.sin(performance.now()/200))+')';g.fillRect(0,0,VW,VH)}
 }
-function bindHunt(){
- const hold=(id,key)=>{const b=$(id),on=e=>{e.preventDefault();ac();if(HT)HT.keys[key]=1;b.classList.add('d');try{b.setPointerCapture(e.pointerId)}catch(_){}},off=()=>{if(HT)HT.keys[key]=0;b.classList.remove('d')};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('lostpointercapture',off)};
+function ctlDef(){const W=innerWidth,H=innerHeight,land=$('hunt').classList.contains('land'),cs=S.ctl.size||1,s1=(land?62:70)*cs,s2=(land?74:84)*cs,bm=Math.max(22,land?16:22);
+ return S.ctl.mir?{bU:{x:(12+s2/2)/W,y:1-(bm+s2/2)/H},bR:{x:1-(12+s1/2)/W,y:1-(bm+s1/2)/H},bL:{x:1-(12+s1+10+s1/2)/W,y:1-(bm+s1/2)/H}}:{bL:{x:(12+s1/2)/W,y:1-(bm+s1/2)/H},bR:{x:(12+s1+10+s1/2)/W,y:1-(bm+s1/2)/H},bU:{x:1-(12+s2/2)/W,y:1-(bm+s2/2)/H}}}
+function applyCtl(){const W=innerWidth,H=innerHeight,cs=S.ctl.size||1;$('hunt').style.setProperty('--cs',cs);const d=ctlDef();
+ for(const k of['bL','bR','bU']){const p=S.ctl[k]||d[k],b=$(k),m=34;b.style.left=cl(p.x*W,m,W-m)+'px';b.style.top=cl(p.y*H,m,H-m)+'px'}}
+function ctlEdit(on){if(!HT)return;HT.edit=on;HT.paused=on;$('hEdit').hidden=!on;['bL','bR','bU'].forEach(k=>$(k).classList.toggle('edit',on));if(on){HT.keys.l=HT.keys.r=HT.keys.u=0;hideAll()}}
+function ctlDrag(b,k,e){const W=innerWidth,H=innerHeight;try{b.setPointerCapture(e.pointerId)}catch(_){}
+ const mv=ev=>{const x=cl(ev.clientX,34,W-34),y=cl(ev.clientY,34,H-34);b.style.left=x+'px';b.style.top=y+'px';S.ctl[k]={x:x/W,y:y/H}},up=()=>{b.removeEventListener('pointermove',mv);b.removeEventListener('pointerup',up);b.removeEventListener('pointercancel',up);save(1)};
+ b.addEventListener('pointermove',mv);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)}
+function bindCtlUi(){
+ $('hSet').onclick=()=>{if(!HT||HT.over)return;ac();HT.paused=true;syncHs();show('hset')};
+ const resume=()=>{if(HT&&!HT.edit)HT.paused=false};
+ $('ov-hset').addEventListener('click',e=>{if(e.target.closest('[data-close]'))resume()});
+ $('hMove').onclick=()=>ctlEdit(true);
+ $('hEditOk').onclick=()=>{ctlEdit(false);save(1);if(HT)HT.paused=false};
+ $('hEditRs').onclick=()=>{for(const k of['bL','bR','bU'])delete S.ctl[k];S.ctl.mir=false;applyCtl();save(1)};
+ $('hReset').onclick=()=>{for(const k of['bL','bR','bU'])delete S.ctl[k];S.ctl.mir=false;S.ctl.size=1;$('csr').value=100;$('csv').textContent='100%';applyCtl();save(1);toast('Tuşlar varsayılan yere döndü')};
+ $('hMirror').onclick=()=>{for(const k of['bL','bR','bU'])delete S.ctl[k];S.ctl.mir=!S.ctl.mir;applyCtl();save(1);toast(S.ctl.mir?'Düzen sol ele göre':'Düzen sağ ele göre')};
+ $('csr').oninput=e=>{S.ctl.size=+e.target.value/100;$('csv').textContent=e.target.value+'%';applyCtl()};$('csr').onchange=()=>save(1);
+ $('hSnd').onclick=()=>{S.sound=!S.sound;syncHs();save(1);if(S.sound)sfx('buy')};
+ $('hVib').onclick=()=>{S.vib=!S.vib;syncHs();save(1);vib(30)}}
+function syncHs(){$('hSnd').querySelector('.sw').classList.toggle('on',S.sound);$('hVib').querySelector('.sw').classList.toggle('on',S.vib);$('csr').value=Math.round((S.ctl.size||1)*100);$('csv').textContent=Math.round((S.ctl.size||1)*100)+'%'}
+function bindHunt(){bindCtlUi();
+ const hold=(id,key)=>{const b=$(id),on=e=>{e.preventDefault();ac();if(HT&&HT.edit){ctlDrag(b,id,e);return}if(HT)HT.keys[key]=1;b.classList.add('d');try{b.setPointerCapture(e.pointerId)}catch(_){}},off=()=>{if(HT)HT.keys[key]=0;b.classList.remove('d')};b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('lostpointercapture',off)};
  hold('bL','l');hold('bR','r');hold('bU','u');
- hc=$('hc');hc.addEventListener('pointerdown',e=>{ac();if(!HT||HT.over)return;const r=hc.getBoundingClientRect();fireAt((e.clientX-r.left)/K+HT.cam,(e.clientY-r.top)/K)});
+ hc=$('hc');hc.addEventListener('pointerdown',e=>{ac();if(!HT||HT.over||HT.paused)return;const r=hc.getBoundingClientRect();fireAt((e.clientX-r.left)/K+HT.cam,(e.clientY-r.top)/K)});
  $('hBack').onclick=()=>{if(HT&&!HT.over)endHunt()};
  addEventListener('keydown',e=>{if(!HT)return;const k=e.key;if(k==='ArrowLeft'||k==='a')HT.keys.l=1;else if(k==='ArrowRight'||k==='d')HT.keys.r=1;else if(k==='ArrowUp'||k==='w'||k===' ')HT.keys.u=1;else if(k>='1'&&k<='5')selWeap(WEAP[+k-1].id)});
  addEventListener('keyup',e=>{if(!HT)return;const k=e.key;if(k==='ArrowLeft'||k==='a')HT.keys.l=0;else if(k==='ArrowRight'||k==='d')HT.keys.r=0;else if(k==='ArrowUp'||k==='w'||k===' ')HT.keys.u=0})}
@@ -572,7 +610,7 @@ function bindHunt(){
 const I=(n,c)=>'<svg class="ic'+(c?' '+c:'')+'"><use href="#i-'+n+'"/></svg>';
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const fmtT=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
-const OVS=['start','menu','help','pick','act','res'];
+const OVS=['start','menu','help','pick','act','res','hset'];
 function hideAll(){OVS.forEach(i=>$('ov-'+i).hidden=true)}
 function show(id){hideAll();$('ov-'+id).hidden=false}
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>hideAll());
@@ -726,5 +764,5 @@ window.__z={S:()=>S,HT:()=>HT,startHunt,fireAt,endHunt,go,tickLab,selWeap,ZT};
 })();
 </script>
 
-<script>try{if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");fetch("index.html?_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{var m=t.match(/name="build" content="(\d+)"/);if(m&&m[1]!=="1794941122"&&!sessionStorage.zr){sessionStorage.zr=1;location.replace(location.pathname+"?v="+m[1])}}).catch(()=>{})}catch(e){}</script>
+<script>try{if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js");fetch("index.html?_="+Date.now(),{cache:"no-store"}).then(r=>r.text()).then(t=>{var m=t.match(/name="build" content="(\d+)"/);if(m&&m[1]!=="1794941391"&&!sessionStorage.zr){sessionStorage.zr=1;location.replace(location.pathname+"?v="+m[1])}}).catch(()=>{})}catch(e){}</script>
 </body></html>
